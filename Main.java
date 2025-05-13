@@ -54,6 +54,10 @@ public class Main {
             choice = sc.nextInt();
             sc.nextLine(); // Consume the newline character
 
+            String trainID = null;
+            int departureTime = 0;
+            Train train = new Train(trainMap, trainID, departureTime); 
+
             switch (choice) {
                 /* For the users! */
                 case 1:
@@ -74,18 +78,20 @@ public class Main {
                     System.out.println("Option 3 selected: Find next train arriving.");
                     // Add functionality here
                     break;
-                    
+                     
                 /* For the manager! */
                 case 4:
                     System.out.println("\nOption 4 selected: Add train schedule(s).\n");
+                    // Train ID
                     System.out.print("Enter the train ID (format: TSxxxx): ");
-                    String trainID = sc.nextLine().toUpperCase();
+                    train.setTrainID(sc.nextLine().toUpperCase());
+                    System.out.println("DEBUG PRINT Train ID: " + train.getTrainID());
+                    // Departure time
                     System.out.print("Enter the departure time (format: HHMM): ");
-                    int departureTime = sc.nextInt();
+                    train.setDepartureTime(sc.nextInt());
+                    System.out.println("DEBUG PRINT departure time: " + train.getDepartureTime());
                     sc.nextLine(); // Consume the newline character
-
-                    Train train = new Train(trainMap, trainID, departureTime); 
-                    train.add_ID_and_departure_time(trainMap, departureTime, trainID);
+                    train.add_ID_and_departure_time();
                     break;
                 case 5:
                     System.out.println("Option 5 selected: Reschedule train(s).");
