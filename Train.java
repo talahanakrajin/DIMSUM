@@ -23,17 +23,8 @@ public class Train {
         return trainMap;
     }
     
-    public void add_ID_and_departure_time(TreeMap<Integer, String> trainMap, int departureTime, String trainID) {
-        if (trainID == null || !trainID.matches("TS[0-9]{4}")) { // Updated regex to explicitly match digits
-            throw new IllegalArgumentException("Invalid train ID! Enter with the format TSxxxx. (x = non-negative integer)");
-        }
-        else if (departureTime < 0 || departureTime > 2359) {
-            throw new IllegalArgumentException("Invalid departure time! Enter between 0000-2359.");
-        }
-        else if (departureTime % 100 >= 60) {
-            throw new IllegalArgumentException("Invalid departure time! Minutes must be between 00-59.");
-        }
-        trainMap.put(departureTime, trainID); // Add the train ID to the TreeMap with the departure time as the key
+    public void add_ID_and_departure_time() {
+        this.trainMap.put(this.departureTime, this.trainID); // Add the train ID to the TreeMap with the departure time as the key
     }
 
     public String getTrainID() {
@@ -41,6 +32,21 @@ public class Train {
     }
     public int getDepartureTime() {
         return departureTime;
+    }
+    public void setTrainID(String trainID) {
+        if (trainID == null || !trainID.matches("TS[0-9]{4}")) { // Updated regex to explicitly match digits
+            throw new IllegalArgumentException("Invalid train ID! Enter with the format TSxxxx. (x = non-negative integer)");
+        }
+        this.trainID = trainID;
+    }
+    public void setDepartureTime(int departureTime) {
+        if (departureTime < 0 || departureTime > 2359) {
+            throw new IllegalArgumentException("Invalid departure time! Enter between 0000-2359.");
+        }
+        else if (departureTime % 100 >= 60) {
+            throw new IllegalArgumentException("Invalid departure time! Minutes must be between 00-59.");
+        }
+        this.departureTime = departureTime;
     }
 
     // IS AVAILABLE
