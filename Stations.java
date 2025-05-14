@@ -1,5 +1,44 @@
 import java.util.TreeMap;
 
 public class Stations {
-    
+    private TreeMap<Integer, String> stationMap;
+    private TreeMap<String, Integer> travelTimeMap;
+
+    // Constructor
+    public Stations(){
+        stationMap = new TreeMap<>();
+        travelTimeMap = new TreeMap<>();
+        initializeStations();
+        initializeTravelTimes();
+    }
+    private void initializeStations(){
+        stationMap.put(1, "Lebak Bulus");
+        stationMap.put(2, "Fatmawati");
+        stationMap.put(3, "Cipete Raya");
+        stationMap.put(4, "Haji Nawi");
+        stationMap.put(5, "Blok A");
+        stationMap.put(6, "Blok M");
+        stationMap.put(7, "ASEAN");
+        stationMap.put(8, "Senayan");
+        stationMap.put(9, "Istora");
+        stationMap.put(10, "Bendungan Hilir");
+        stationMap.put(11, "Setiabudi");
+        stationMap.put(12, "Dukuh Atas");
+        stationMap.put(13, "Bundaran HI");
+    }
+    // Values are in minutes
+    private void initializeTravelTimes(){
+        travelTimeMap.put("1-2", 3);  // Lebak Bulus -> Fatmawati
+        travelTimeMap.put("2-3", 3);  // Fatmawati -> Cipete Raya
+        travelTimeMap.put("3-4", 2);  // Cipete Raya -> Haji Nawi
+        travelTimeMap.put("4-5", 2);  // Haji Nawi -> Blok A
+        travelTimeMap.put("5-6", 3);  // Blok A -> Blok M
+        travelTimeMap.put("6-7", 2);  // Blok M -> ASEAN
+        travelTimeMap.put("7-8", 2);  // ASEAN -> Senayan
+        travelTimeMap.put("8-9", 2);  // Senayan -> Istora
+        travelTimeMap.put("9-10", 3); // Istora -> Bendungan Hilir
+        travelTimeMap.put("10-11", 2); // Bendungan Hilir -> Setiabudi
+        travelTimeMap.put("11-12", 2); // Setiabudi -> Dukuh Atas
+        travelTimeMap.put("12-13", 9); // Dukuh Atas -> Bundaran HI
+    }
 }
