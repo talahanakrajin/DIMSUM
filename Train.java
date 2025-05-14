@@ -1,6 +1,6 @@
 import java.util.TreeMap;
 
-public class Train {
+public class Train extends Stations {
     private String trainID;
     private int departureTime;
 
