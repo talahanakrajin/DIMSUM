@@ -43,10 +43,16 @@ public class Stations {
         travelTimeMap.put("11-12", 2); // Setiabudi -> Dukuh Atas
         travelTimeMap.put("12-13", 9); // Dukuh Atas -> Bundaran HI
     }
+
     public TreeMap<Integer, String> getStationMap() {
         return stationMap;
     }
-    public void checkStationNumber(int stationNumber) {
+    public TreeMap<String, Integer> getTravelTimeMap() {
+        return travelTimeMap;
+    }
+    
+
+    public int checkStationNumber(int stationNumber) {
         boolean validInput = false;
         while (!validInput) {
             if (sc.hasNextInt()) {
@@ -61,5 +67,7 @@ public class Stations {
                 sc.next(); // Consume invalid input
             }
         }
+        sc.nextLine(); // Consume the newline character after number input
+        return stationNumber;
     }
 }

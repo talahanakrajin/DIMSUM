@@ -1,14 +1,16 @@
 import java.util.Scanner;
-import java.util.TreeMap;
 
 public class Main {
     public static void main(String[] args) {
-        TreeMap<Integer, String> trainMap = new TreeMap<>(); 
-
         int choice;
         int stationNumber = 0; // Initialize stationNumber 
 
         Scanner sc = new Scanner(System.in); // Ensure Scanner is correctly initialized
+
+        // Create Train object ONCE and reuse it
+        String trainID = null;
+        int departureTime = 0;
+        Train train = new Train(trainID, departureTime); 
 
         System.out.println("\nWelcome to DIMSUM 'Digital Interactive MRT Schedule Update Manager'\n");
 
@@ -33,21 +35,12 @@ public class Main {
             choice = sc.nextInt();
             sc.nextLine(); // Consume the newline character
 
-            String trainID = null;
-            int departureTime = 0;
-            Train train = new Train(trainMap, trainID, departureTime); 
-
             switch (choice) {
                 /* For the users! */
                 case 1: // View full schedule
                     System.out.println("Option 1 selected: View full schedule.");
                     System.out.println("\n-- Train Schedule --");
-                    train.getTrainMap().forEach((key, value) -> {
-                        String keyString = String.format("%04d", key);
-                        String hours = keyString.substring(0, 2);
-                        String minutes = keyString.substring(2, 4);
-                        System.out.printf("Departure Time: %s:%s, Train ID: %s%n\n", hours, minutes, value);
-                    });
+                    train.printSchedule(null);
                     break;
                 case 2: // View each station's schedule
                     System.out.println("Option 2 selected: View each station's schedule.");
@@ -56,10 +49,14 @@ public class Main {
                         System.out.println(key + ". " + value + "\n");
                     });
                     System.out.print("Enter the station number to view its schedule: ");
-                    
-                    train.checkStationNumber(stationNumber);
-                    System.out.println("You selected station: " + train.getStationMap().get(stationNumber));
-                    System.out.println("Schedule for " + train.getStationMap().get(stationNumber) + ":");
+
+                    stationNumber = train.checkStationNumber(stationNumber);
+                    String selectedStation = train.getStationMap().get(stationNumber);
+
+                    System.out.println("You selected station: " + selectedStation);
+                    System.out.println("Schedule for " + selectedStation + ":");
+
+                    train.printSchedule(selectedStation);
                     stationNumber = 0; // Reset stationNumber for next input                    
                     break;
                 case 3: // Find next train arriving
@@ -70,9 +67,10 @@ public class Main {
                 /* For the manager! */
                 case 4: // Add train schedule(s)
                     System.out.println("\nOption 4 selected: Add train schedule(s).\n");
-                    System.out.println("Please enter the following details to add a new train schedule:\nWhich station do you want to add a train schedule to?\n\n1. Lebak Bulus (Start Terminus)\n2. Bundaran HI (End Terminus)\n 3. Blok M)");
+                    System.out.println("Please enter the following details to add a new train schedule:\nWhich station do you want to add a train schedule to?\n\n1. Lebak Bulus (Start Terminus)\n2. Bundaran HI (End Terminus)\n3. Blok M)");
                     
                     boolean validInput = false;
+                    String stationName = null;
                     while (!validInput) {
                         if (sc.hasNextInt()) {
                             stationNumber = sc.nextInt();
@@ -86,18 +84,33 @@ public class Main {
                             sc.next(); // Consume invalid input
                         }
                     }
-                    System.out.println("You selected station: " + train.getStationMap().get(stationNumber));
+                    
+                    switch (stationNumber) {
+                        case 1:
+                            System.out.println("You selected station: Lebak Bulus (Start Terminus)");
+                            stationName = "Lebak Bulus";
+                            break;
+                        case 2:
+                            System.out.println("You selected station: Bundaran HI (End Terminus)");
+                            stationName = "Bundaran HI";
+                            break;
+                        case 3:
+                            System.out.println("You selected station: Blok M");
+                            stationName = "Blok M";
+                            break;
+                    }
+                    sc.nextLine(); // Consume the newline character
+                    System.out.println("Please enter the following details to add a new train schedule:\n");
 
                     // Train ID
-                    System.out.print("Enter the train ID (format: TSxxxx): ");
-                    train.setTrainID(sc.nextLine().toUpperCase());
+                    train.inputTrainID(sc);
                     System.out.println("DEBUG PRINT Train ID: " + train.getTrainID());
                     // Departure time
-                    System.out.print("Enter the departure time (format: HHMM): ");
-                    train.setDepartureTime(sc.nextInt());
+                    train.inputDepartureTime(sc);
                     System.out.println("DEBUG PRINT departure time: " + train.getDepartureTime());
-                    sc.nextLine(); // Consume the newline character
-                    train.add_ID_and_departure_time();
+                    
+                    train.addToScheduleMap(train.getDepartureTime(), train.getTrainID(), stationName);
+                    System.out.println("Train schedule added successfully!");
                     break;
                 case 5: // Reschedule train(s)
                     System.out.println("Option 5 selected: Reschedule train(s).");
