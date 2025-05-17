@@ -8,7 +8,7 @@ public class Train extends Stations {
     private boolean isAvailable;
     private boolean isOnTime; 
     
-    TreeMap<Integer, String> scheduleMap = new TreeMap<>(); // departure time -> "TrainID,StationName"
+    TreeMap<Integer, String> scheduleMap = new TreeMap<>(); // departure time: "TrainID,StationName"
 
     // Constructor
     public Train(String trainID, int departureTime) {
@@ -57,7 +57,7 @@ public class Train extends Stations {
     }
 
     public void addToScheduleMap(int departureTime, String trainID, String stationName) {
-        scheduleMap.put(departureTime, trainID + "," + stationName);
+        scheduleMap.put(departureTime, trainID + "," + stationName); // departure time as the key, "TrainID,StationName" as the value
     }
 
     // Print all or filtered by station
