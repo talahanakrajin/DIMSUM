@@ -1,8 +1,10 @@
 import java.util.TreeMap;
+import java.util.Scanner;
 
 public class Stations {
     private TreeMap<Integer, String> stationMap;
     private TreeMap<String, Integer> travelTimeMap;
+    private Scanner sc = new Scanner(System.in);
 
     // Constructor
     public Stations(){
@@ -40,5 +42,24 @@ public class Stations {
         travelTimeMap.put("10-11", 2); // Bendungan Hilir -> Setiabudi
         travelTimeMap.put("11-12", 2); // Setiabudi -> Dukuh Atas
         travelTimeMap.put("12-13", 9); // Dukuh Atas -> Bundaran HI
+    }
+    public TreeMap<Integer, String> getStationMap() {
+        return stationMap;
+    }
+    public void checkStationNumber(int stationNumber) {
+        boolean validInput = false;
+        while (!validInput) {
+            if (sc.hasNextInt()) {
+                stationNumber = sc.nextInt();
+                if (getStationMap().containsKey(stationNumber)) {
+                    validInput = true;
+                } else {
+                    System.out.print("Invalid station number! Please enter a number between 1 - 13: ");
+                }
+            } else {
+                System.out.print("Invalid input! Please enter a number: ");
+                sc.next(); // Consume invalid input
+            }
+        }
     }
 }
