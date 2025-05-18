@@ -70,4 +70,30 @@ public class Stations {
         sc.nextLine(); // Consume the newline character after number input
         return stationNumber;
     }
+
+    // Prompts user to select a station number (0 for "keep original station" is allowed)
+    public int stationSelection() {
+        getStationMap().forEach((key, value) -> {
+            System.out.println(key + ". " + value + "\n");
+        });
+        System.out.print("Enter the station number to reschedule (Enter 0 to keep the original station): ");
+
+        int stationNum = -1;
+        boolean validInput = false;
+        while (!validInput) {
+            if (sc.hasNextInt()) {
+                stationNum = sc.nextInt();
+                if (stationNum == 0 || getStationMap().containsKey(stationNum)) {
+                    validInput = true;
+                } else {
+                    System.out.print("Invalid station number! Please enter a number between 0 - 13: ");
+                }
+            } else {
+                System.out.print("Invalid input! Please enter a number between 0 - 13: ");
+                sc.next();
+            }
+        }
+        sc.nextLine(); // Consume the newline character
+        return stationNum;
+    }
 }
