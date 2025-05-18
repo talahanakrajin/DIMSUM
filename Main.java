@@ -10,6 +10,7 @@ public class Main {
         // Create Train object ONCE and reuse it
         String trainID = null;
         int departureTime = 0;
+        boolean validInput = false; // Flag for valid input
         Train train = new Train(trainID, departureTime); 
 
         System.out.println("\nWelcome to DIMSUM 'Digital Interactive MRT Schedule Update Manager'\n");
@@ -18,7 +19,7 @@ public class Main {
             System.out.println("Please select an option:");
             System.out.println("1. View full schedule");
             System.out.println("2. View each station's schedule");
-            System.out.println("3. Find next train arriving");
+            System.out.println("3. Find next train departing");
             System.out.println("4. Add train schedule(s)");
             System.out.println("5. Reschedule train(s)");
             System.out.println("6. Delay train(s)");
@@ -59,9 +60,19 @@ public class Main {
                     train.printSchedule(selectedStation);
                     stationNumber = 0; // Reset stationNumber for next input                    
                     break;
-                case 3: // Find next train arriving
-                    System.out.println("Option 3 selected: Find next train arriving.");
-                    // Add functionality here
+                case 3: // Find next train departing
+                    System.out.println("Option 3 selected: Find next departing train.");
+
+                    int nextDepTime = train.getScheduleMap().firstEntry().getKey(); // Get the first entry (earliest departure time)
+                    String[] parts = train.getScheduleMap().firstEntry().getValue().split(",", 2); // List of parts: [TrainID, StationName]
+                    String nextTrainID = parts[0]; // Train ID
+                    String nextStationName = parts.length > 1 ? parts[1] : ""; // Station name
+
+                    String nextDepTimeStr = String.format("%04d", nextDepTime);
+                    String hours = nextDepTimeStr.substring(0, 2);
+                    String minutes = nextDepTimeStr.substring(2, 4);
+
+                    System.out.printf("Next train departing:\nTrain ID: %s | Departure Time: %s:%s | Station: %s%n", nextTrainID, hours, minutes, nextStationName);
                     break;
 
                 /* For the manager! */
@@ -69,7 +80,7 @@ public class Main {
                     System.out.println("\nOption 4 selected: Add train schedule(s).\n");
                     System.out.println("Please enter the following details to add a new train schedule:\nWhich station do you want to add a train schedule to?\n\n1. Lebak Bulus (Start Terminus)\n2. Bundaran HI (End Terminus)\n3. Blok M)");
                     
-                    boolean validInput = false;
+                    validInput = false; // Reset validInput for new input
                     String stationName = null;
                     while (!validInput) {
                         if (sc.hasNextInt()) {
@@ -112,17 +123,73 @@ public class Main {
                     train.addToScheduleMap(train.getDepartureTime(), train.getTrainID(), stationName);
                     System.out.println("Train schedule added successfully!");
                     break;
+                
                 case 5: // Reschedule train(s)
                     System.out.println("Option 5 selected: Reschedule train(s).");
-                    // Add functionality here
+                    System.out.println("Find the train using\n1. Train ID?\n2. Departure time?\nSelect the option: ");
+                    int rescheduleOption = 0;
+                    validInput = false;
+                    while (!validInput) {
+                        if (sc.hasNextInt()) {
+                            rescheduleOption = sc.nextInt();
+                            if (rescheduleOption == 1 || rescheduleOption == 2) {
+                                validInput = true;
+                            } else {
+                                System.out.print("Invalid option! Please enter 1 or 2: ");
+                            }
+                        } else {
+                            System.out.print("Invalid input! Please enter 1 or 2: ");
+                            sc.next();
+                        }
+                    }
+                    sc.nextLine(); // Consume the newline character
+
+                    switch (rescheduleOption) {
+                        case 1:
+                            System.out.println("You selected option 1: Train ID.");
+                            System.out.print("Enter the train ID to reschedule: ");
+                            String rescheduleTrainID = sc.nextLine();
+                            int newDepartureTime = train.inputDepTime(sc);
+
+                            int rescheduleStationNumber = train.inputStation(sc);
+                            String rescheduleStationName = train.getStationMap().get(rescheduleStationNumber);
+
+                            // Call train method to perform the rescheduling
+                            train.rescheduleTrain(rescheduleTrainID, newDepartureTime, rescheduleStationName);
+                            System.out.println("Would you like to reschedule another train? (Y/N)");
+                            String rescheduleAnother = sc.nextLine();
+
+                            if (rescheduleAnother.equalsIgnoreCase("Y")) {
+                                System.out.println("Rescheduling another train...");
+                            } else {
+                                System.out.println("Exiting rescheduling.");
+                            }
+
+                            break;
+                        case 2:
+                            System.out.println("You selected option 2: Departure time.");
+                            System.out.print("Enter the departure time to reschedule (format: HHMM): ");
+                            int oldDepartureTime = train.inputDepTime(sc);
+
+                            System.out.print("Enter the new departure time (format: HHMM): ");
+                            int newDepTime = train.inputDepTime(sc);
+
+                            int rescheduleStationNum = train.inputStation(sc);
+                            String rescheduleStation = train.getStationMap().get(rescheduleStationNum);
+
+                            // Call train method to perform the rescheduling
+                            train.rescheduleTrain(oldDepartureTime, newDepTime, rescheduleStation);
+                            break;
+                    }
                     break;
+                
                 case 6: // Delay train(s)
                     System.out.println("Option 6 selected: Delay train(s).");
-                    // Add functionality here
+                    
                     break;
                 case 7: // Cancel train(s)
                     System.out.println("Option 7 selected: Cancel train(s).");
-                    // Add functionality here
+                    
                     break;
                 case 8: // Exit
                     System.out.println("Exiting the Train Management System. Goodbye!");
