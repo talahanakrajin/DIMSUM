@@ -42,6 +42,18 @@ public class Train extends Stations {
         isOnTime.put(trainID, 0); // New train is on time by default
     }
 
+    // Add the delay in minutes to the HHMM time and return a new HHMM integer
+    private int addMinutesToTime(int time, int minutesToAdd) {
+        int hours = time / 100;
+        int minutes = time % 100;
+        minutes += minutesToAdd;
+        hours += minutes / 60;
+        minutes = minutes % 60;
+        // Wrap around if hours >= 24
+        hours = hours % 24;
+        return (hours * 100) + minutes;
+    }
+
     // Print all or filtered by station
     public void printSchedule(String selectedStation) {
         boolean found = false;
@@ -242,17 +254,5 @@ public class Train extends Stations {
         } else {
             System.out.println("No train found with the specified departure time.");
         }
-    }
-
-    // Add the delay in minutes to the HHMM time and return a new HHMM integer
-    private int addMinutesToTime(int time, int minutesToAdd) {
-        int hours = time / 100;
-        int minutes = time % 100;
-        minutes += minutesToAdd;
-        hours += minutes / 60;
-        minutes = minutes % 60;
-        // Wrap around if hours >= 24
-        hours = hours % 24;
-        return (hours * 100) + minutes;
     }
 }
