@@ -74,7 +74,12 @@ public class Main {
                     String hours = nextDepTimeStr.substring(0, 2);
                     String minutes = nextDepTimeStr.substring(2, 4);
 
-                    System.out.printf("Next train departing:\nTrain ID: %s | Departure Time: %s:%s | Station: %s%n", nextTrainID, hours, minutes, nextStationName);
+                    int delay = train.isOnTime.getOrDefault(trainID, 0);
+                    if (delay > 0) {
+                        System.out.printf("Next train departing:\nTrain ID: %s | Departure Time: %s:%s (Delayed by %d minutes)%n | Station: %s", nextTrainID, hours, minutes, nextStationName, delay);
+                    } else {
+                        System.out.printf("Next train departing:\nTrain ID: %s | Departure Time: %s:%s | Station: %s", nextTrainID, hours, minutes, nextStationName);
+                    }
                     break;
 
                 /* For the manager! */
@@ -262,6 +267,10 @@ public class Main {
                                 train.delayTrain(delayTrainID, delayMinutes);
                                 break;
                             case 2:
+                                System.out.println("You selected option 2: Departure time.");
+                                System.out.print("Enter the departure time to delay (format: HHMM): ");
+                                int oldDelayTime = train.inputDepTime(sc);
+
                                 System.out.print("Enter delay in minutes: ");
                                 delayMinutes = 0;
                                 while (true) {
@@ -274,9 +283,6 @@ public class Main {
                                         sc.next();
                                     }
                                 }
-                                System.out.println("You selected option 2: Departure time.");
-                                System.out.print("Enter the departure time to delay (format: HHMM): ");
-                                int oldDelayTime = train.inputDepTime(sc);
                                 train.delayTrain(oldDelayTime, delayMinutes);
                                 break;
                         }
