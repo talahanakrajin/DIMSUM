@@ -26,12 +26,13 @@ public class Main {
             System.out.println("5. Reschedule train(s)");
             System.out.println("6. Delay train(s)");
             System.out.println("7. Cancel train(s)");
-            System.out.println("8. Exit");
+            System.out.println("8. Simulate trains running");
+            System.out.println("9. Exit");
 
             System.out.print("Enter your choice: ");
 
             while (!sc.hasNextInt()) { // Handles invalid inputs
-                System.out.println("Wrong Input! Please enter a number between 1 and 8.");
+                System.out.println("Wrong Input! Please enter a number between 1 and 9.");
                 sc.next(); // Consume invalid input
                 System.out.print("Enter your choice: ");
             }
@@ -65,20 +66,23 @@ public class Main {
                 case 3: // Find next train departing
                     System.out.println("Option 3 selected: Find next departing train.");
 
-                    int nextDepTime = train.getScheduleMap().firstEntry().getKey(); // Get the first entry (earliest departure time)
-                    String[] parts = train.getScheduleMap().firstEntry().getValue().split(",", 2); // List of parts: [TrainID, StationName]
-                    String nextTrainID = parts[0]; // Train ID
-                    String nextStationName = parts.length > 1 ? parts[1] : ""; // Station name
+                    if (train.getTrainMap().isEmpty()) {
+                        System.out.println("No trains scheduled!");
+                        break;
+                    }
+                    int nextDepTime = train.getTrainMap().firstEntry().getKey(); // Get the first entry (earliest departure time)
+                    String nextTrainID = train.getTrainMap().firstEntry().getValue(); // Train ID
+                    String nextStationName = train.getCurrentStation().getOrDefault(nextDepTime, ""); // Station name
 
                     String nextDepTimeStr = String.format("%04d", nextDepTime);
                     String hours = nextDepTimeStr.substring(0, 2);
                     String minutes = nextDepTimeStr.substring(2, 4);
 
-                    int delay = train.isOnTime.getOrDefault(trainID, 0);
+                    int delay = train.isOnTime.getOrDefault(nextTrainID, 0);
                     if (delay > 0) {
-                        System.out.printf("Next train departing:\nTrain ID: %s | Departure Time: %s:%s (Delayed by %d minutes)%n | Station: %s", nextTrainID, hours, minutes, nextStationName, delay);
+                        System.out.printf("Next train departing:\nTrain ID: %s | Departure Time: %s:%s (Delayed by %d minutes) | Station: %s\n", nextTrainID, hours, minutes, delay, nextStationName);
                     } else {
-                        System.out.printf("Next train departing:\nTrain ID: %s | Departure Time: %s:%s | Station: %s", nextTrainID, hours, minutes, nextStationName);
+                        System.out.printf("Next train departing:\nTrain ID: %s | Departure Time: %s:%s | Station: %s\n", nextTrainID, hours, minutes, nextStationName);
                     }
                     break;
 
@@ -339,13 +343,17 @@ public class Main {
                         }
                     }
                     break;
-                case 8: // Exit
+                case 8: // Simulate train running (this creates the whole schedule for the day)
+                    System.out.println("Option 8 selected: Simulate trains running.");
+                    
+                    break;
+                case 9: // Exit
                     System.out.println("Exiting the Train Management System. Goodbye!");
                     break;
                 default:
-                    System.out.println("Invalid choice. Please select a number between 1 and 8.");
+                    System.out.println("Invalid choice. Please select a number between 1 and 9.");
             }
-        } while (choice != 8); // while the user does not select 8 (exit) do the switch statements
+        } while (choice != 9); // while the user does not select 8 (exit) do the switch statements
 
         sc.close(); 
     }
