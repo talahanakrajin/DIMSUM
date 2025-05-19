@@ -5,17 +5,13 @@ public class Train extends Stations {
     private String trainID;
     private int departureTime;
 
-    private boolean isAvailable;
-    private boolean isOnTime; 
-    
     TreeMap<Integer, String> scheduleMap = new TreeMap<>(); // departure time: "TrainID,StationName"
+    TreeMap<String, Integer> isOnTime = new TreeMap<>(); // trainID: delayMinutes
 
     // Constructor
     public Train(String trainID, int departureTime) {
         this.trainID = trainID;
         this.departureTime = departureTime;
-        this.isAvailable = true; 
-        this.isOnTime = true; 
     }
 
     public String getTrainID() {
@@ -31,45 +27,13 @@ public class Train extends Stations {
         this.departureTime = departureTime;
     }
 
-    // IS AVAILABLE
-    public void checkTrainAvailability() {
-        if (isAvailable) {
-            System.out.println(trainID + " is available.");
-        } else {
-            System.out.println(trainID + " is out of service.");
-        }
-    }
-    public void setTrainAvailability(boolean isAvailable) {
-        this.isAvailable = isAvailable;
-    }
-
-    // IS ON TIME
-    public void checkTrainOnTime() {
-        if (isOnTime) {
-            System.out.println(trainID + " is on time.");
-        } else {
-            System.out.println(trainID + " is delayed.");
-        }
-    }
-
-    // Add the delay in minutes to the HHMM time and return a new HHMM integer
-    private int addMinutesToTime(int time, int minutesToAdd) {
-        int hours = time / 100;
-        int minutes = time % 100;
-        minutes += minutesToAdd;
-        hours += minutes / 60;
-        minutes = minutes % 60;
-        // Wrap around if hours >= 24
-        hours = hours % 24;
-        return (hours * 100) + minutes;
-    }
-
     public TreeMap<Integer, String> getScheduleMap() {
         return scheduleMap;
     }
 
     public void addToScheduleMap(int departureTime, String trainID, String stationName) {
-        scheduleMap.put(departureTime, trainID + "," + stationName); // departure time as the key, "TrainID,StationName" as the value
+        scheduleMap.put(departureTime, trainID + "," + stationName);
+        isOnTime.put(trainID, 0); // New train is on time by default
     }
 
     // Print all or filtered by station
@@ -77,14 +41,21 @@ public class Train extends Stations {
         boolean found = false;
         for (var entry : scheduleMap.entrySet()) {
             int depTime = entry.getKey();
-            String[] parts = entry.getValue().split(",", 2); // List of parts: [TrainID, StationName]
-            String trainID = parts[0]; // Train ID
-            String stationName = parts.length > 1 ? parts[1] : ""; // Station name
+            String[] parts = entry.getValue().split(",", 2);
+            String trainID = parts[0];
+            String stationName = parts.length > 1 ? parts[1] : "";
+
+            // Check if the train is delayed, if not it will default to 0
+            int delay = isOnTime.getOrDefault(trainID, 0);
             if (selectedStation == null || stationName.equalsIgnoreCase(selectedStation)) {
                 String depTimeStr = String.format("%04d", depTime);
                 String hours = depTimeStr.substring(0, 2);
                 String minutes = depTimeStr.substring(2, 4);
-                System.out.printf("Train ID: %s | Departure Time: %s:%s | Station: %s%n", trainID, hours, minutes, stationName);
+                System.out.printf("Train ID: %s | Departure Time: %s:%s | Station: %s", trainID, hours, minutes, stationName);
+                if (delay > 0) {
+                    System.out.printf(" | delayed %d minutes", delay);
+                }
+                System.out.println();
                 found = true;
             }
         }
@@ -155,34 +126,39 @@ public class Train extends Stations {
     /* Method overloading for rescheduling train */
     public void rescheduleTrain(int oldDepTime, int newDepTime, String newStation) {
         if (scheduleMap.containsKey(oldDepTime)) {
-            String trainID_and_station = scheduleMap.get(oldDepTime);
-            // Remove the old departure time, and replaces the station name
+            String value = scheduleMap.get(oldDepTime);
+            String[] parts = value.split(",", 2);
+            String trainID = parts[0];
+            String stationName = parts.length > 1 ? parts[1] : "";
             scheduleMap.remove(oldDepTime);
 
             if (newStation == null) {
                 System.out.println("No new station provided. Keeping the old station.");
             } else {
-                trainID_and_station = trainID_and_station.split(",")[0] + "," + newStation; // Update station name
+                stationName = newStation;
             }
-            scheduleMap.put(newDepTime, trainID_and_station);
+            scheduleMap.put(newDepTime, trainID + "," + stationName);
             System.out.println("Train rescheduled from " + oldDepTime + " to " + newDepTime);
         } else {
             System.out.println("No train found with the specified departure time.");
         }
     }
+
     public void rescheduleTrain(String trainID, int newDepTime, String newStation) {
         for (var entry : scheduleMap.entrySet()) {
-            if (entry.getValue().startsWith(trainID)) {
+            String[] parts = entry.getValue().split(",", 2);
+            if (parts[0].equalsIgnoreCase(trainID)) {
                 int oldDepTime = entry.getKey();
+                String stationName = parts.length > 1 ? parts[1] : "";
                 scheduleMap.remove(oldDepTime);
 
                 if (newStation == null) {
                     System.out.println("\nNo new station provided. Keeping the old station.");
                     System.out.print("Train Successfully rescheduled!\n");
                 } else {
-                    entry.setValue(trainID + "," + newStation); // Update station name
+                    stationName = newStation;
                 }
-                scheduleMap.put(newDepTime, entry.getValue());
+                scheduleMap.put(newDepTime, trainID + "," + stationName);
                 return;
             }
         }
@@ -196,11 +172,12 @@ public class Train extends Stations {
             String[] parts = entry.getValue().split(",", 2);
             if (parts[0].equalsIgnoreCase(trainID)) {
                 int oldDepTime = entry.getKey();
-                int newDepTime = addMinutesToTime(oldDepTime, delayMinutes);
                 String stationName = parts.length > 1 ? parts[1] : "";
+                int newDepTime = addMinutesToTime(oldDepTime, delayMinutes);
                 scheduleMap.remove(oldDepTime);
                 scheduleMap.put(newDepTime, trainID + "," + stationName);
-                isOnTime = false;
+                int currentDelay = isOnTime.getOrDefault(trainID, 0);
+                isOnTime.put(trainID, currentDelay + delayMinutes);
                 System.out.printf("Train %s delayed by %d minutes. New departure time: %04d\n", trainID, delayMinutes, newDepTime);
                 found = true;
                 break;
@@ -221,7 +198,8 @@ public class Train extends Stations {
             int newDepTime = addMinutesToTime(oldDepTime, delayMinutes);
             scheduleMap.remove(oldDepTime);
             scheduleMap.put(newDepTime, trainID + "," + stationName);
-            isOnTime = false;
+            int currentDelay = isOnTime.getOrDefault(trainID, 0);
+            isOnTime.put(trainID, currentDelay + delayMinutes);
             System.out.printf("Train %s delayed by %d minutes. New departure time: %04d\n", trainID, delayMinutes, newDepTime);
         } else {
             System.out.println("No train found with the specified departure time.");
@@ -251,5 +229,17 @@ public class Train extends Stations {
         } else {
             System.out.println("No train found with the specified departure time.");
         }
+    }
+
+    // Add the delay in minutes to the HHMM time and return a new HHMM integer
+    private int addMinutesToTime(int time, int minutesToAdd) {
+        int hours = time / 100;
+        int minutes = time % 100;
+        minutes += minutesToAdd;
+        hours += minutes / 60;
+        minutes = minutes % 60;
+        // Wrap around if hours >= 24
+        hours = hours % 24;
+        return (hours * 100) + minutes;
     }
 }
