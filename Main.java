@@ -354,7 +354,6 @@ public class Main {
                     System.out.println("Invalid choice. Please select a number between 1 and 9.");
             }
         } while (choice != 9); // while the user does not select 8 (exit) do the switch statements
-
         sc.close(); 
     }
 }
