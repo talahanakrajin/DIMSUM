@@ -5,7 +5,8 @@ public class Train extends Stations {
     private String trainID;
     private int departureTime;
 
-    TreeMap<Integer, String> scheduleMap = new TreeMap<>(); // departure time: "TrainID,StationName"
+    TreeMap<Integer, String> trainMap = new TreeMap<>(); // departure time: TrainID
+    TreeMap<Integer, String> currentStation = new TreeMap<>(); // departure time: StationName
     TreeMap<String, Integer> isOnTime = new TreeMap<>(); // trainID: delayMinutes
 
     // Constructor
@@ -27,25 +28,27 @@ public class Train extends Stations {
         this.departureTime = departureTime;
     }
 
-    public TreeMap<Integer, String> getScheduleMap() {
-        return scheduleMap;
+    public TreeMap<Integer, String> getTrainMap() {
+        return trainMap;
+    }
+    public TreeMap<Integer, String> getCurrentStation() {
+        return currentStation;
     }
 
+    // Add a new train schedule
     public void addToScheduleMap(int departureTime, String trainID, String stationName) {
-        scheduleMap.put(departureTime, trainID + "," + stationName);
+        trainMap.put(departureTime, trainID);
+        currentStation.put(departureTime, stationName);
         isOnTime.put(trainID, 0); // New train is on time by default
     }
 
     // Print all or filtered by station
     public void printSchedule(String selectedStation) {
         boolean found = false;
-        for (var entry : scheduleMap.entrySet()) {
+        for (var entry : trainMap.entrySet()) {
             int depTime = entry.getKey();
-            String[] parts = entry.getValue().split(",", 2);
-            String trainID = parts[0];
-            String stationName = parts.length > 1 ? parts[1] : "";
-
-            // Check if the train is delayed, if not it will default to 0
+            String trainID = entry.getValue();
+            String stationName = currentStation.getOrDefault(depTime, "");
             int delay = isOnTime.getOrDefault(trainID, 0);
             if (selectedStation == null || stationName.equalsIgnoreCase(selectedStation)) {
                 String depTimeStr = String.format("%04d", depTime);
@@ -125,19 +128,19 @@ public class Train extends Stations {
 
     /* Method overloading for rescheduling train */
     public void rescheduleTrain(int oldDepTime, int newDepTime, String newStation) {
-        if (scheduleMap.containsKey(oldDepTime)) {
-            String value = scheduleMap.get(oldDepTime);
-            String[] parts = value.split(",", 2);
-            String trainID = parts[0];
-            String stationName = parts.length > 1 ? parts[1] : "";
-            scheduleMap.remove(oldDepTime);
+        if (trainMap.containsKey(oldDepTime)) {
+            String trainID = trainMap.get(oldDepTime);
+            String stationName = currentStation.getOrDefault(oldDepTime, "");
+            trainMap.remove(oldDepTime);
+            currentStation.remove(oldDepTime);
 
             if (newStation == null) {
                 System.out.println("No new station provided. Keeping the old station.");
             } else {
                 stationName = newStation;
             }
-            scheduleMap.put(newDepTime, trainID + "," + stationName);
+            trainMap.put(newDepTime, trainID);
+            currentStation.put(newDepTime, stationName);
             System.out.println("Train rescheduled from " + oldDepTime + " to " + newDepTime);
         } else {
             System.out.println("No train found with the specified departure time.");
@@ -145,59 +148,67 @@ public class Train extends Stations {
     }
 
     public void rescheduleTrain(String trainID, int newDepTime, String newStation) {
-        for (var entry : scheduleMap.entrySet()) {
-            String[] parts = entry.getValue().split(",", 2);
-            if (parts[0].equalsIgnoreCase(trainID)) {
-                int oldDepTime = entry.getKey();
-                String stationName = parts.length > 1 ? parts[1] : "";
-                scheduleMap.remove(oldDepTime);
-
-                if (newStation == null) {
-                    System.out.println("\nNo new station provided. Keeping the old station.");
-                    System.out.print("Train Successfully rescheduled!\n");
-                } else {
-                    stationName = newStation;
-                }
-                scheduleMap.put(newDepTime, trainID + "," + stationName);
-                return;
+        Integer oldDepTime = null;
+        String stationName = null;
+        for (var entry : trainMap.entrySet()) {
+            if (entry.getValue().equalsIgnoreCase(trainID)) {
+                oldDepTime = entry.getKey();
+                stationName = currentStation.getOrDefault(oldDepTime, "");
+                break;
             }
         }
-        System.out.println("No train found with the specified train ID.");
+        if (oldDepTime != null) {
+            trainMap.remove(oldDepTime);
+            currentStation.remove(oldDepTime);
+
+            if (newStation == null) {
+                System.out.println("\nNo new station provided. Keeping the old station.");
+                System.out.print("Train Successfully rescheduled!\n");
+            } else {
+                stationName = newStation;
+            }
+            trainMap.put(newDepTime, trainID);
+            currentStation.put(newDepTime, stationName);
+        } else {
+            System.out.println("No train found with the specified train ID.");
+        }
     }
 
     // Delay a train by Train ID and delay time (in minutes)
     public void delayTrain(String trainID, int delayMinutes) {
-        boolean found = false;
-        for (var entry : scheduleMap.entrySet()) {
-            String[] parts = entry.getValue().split(",", 2);
-            if (parts[0].equalsIgnoreCase(trainID)) {
-                int oldDepTime = entry.getKey();
-                String stationName = parts.length > 1 ? parts[1] : "";
-                int newDepTime = addMinutesToTime(oldDepTime, delayMinutes);
-                scheduleMap.remove(oldDepTime);
-                scheduleMap.put(newDepTime, trainID + "," + stationName);
-                int currentDelay = isOnTime.getOrDefault(trainID, 0);
-                isOnTime.put(trainID, currentDelay + delayMinutes);
-                System.out.printf("Train %s delayed by %d minutes. New departure time: %04d\n", trainID, delayMinutes, newDepTime);
-                found = true;
+        Integer oldDepTime = null;
+        String stationName = null;
+        for (var entry : trainMap.entrySet()) {
+            if (entry.getValue().equalsIgnoreCase(trainID)) {
+                oldDepTime = entry.getKey();
+                stationName = currentStation.getOrDefault(oldDepTime, "");
                 break;
             }
         }
-        if (!found) {
+        if (oldDepTime != null) {
+            int newDepTime = addMinutesToTime(oldDepTime, delayMinutes);
+            trainMap.remove(oldDepTime);
+            currentStation.remove(oldDepTime);
+            trainMap.put(newDepTime, trainID);
+            currentStation.put(newDepTime, stationName);
+            int currentDelay = isOnTime.getOrDefault(trainID, 0);
+            isOnTime.put(trainID, currentDelay + delayMinutes);
+            System.out.printf("Train %s delayed by %d minutes. New departure time: %04d\n", trainID, delayMinutes, newDepTime);
+        } else {
             System.out.println("No train found with the specified train ID.");
         }
     }
 
     // Delay a train by departure time (in HHMM)
     public void delayTrain(int oldDepTime, int delayMinutes) {
-        if (scheduleMap.containsKey(oldDepTime)) {
-            String value = scheduleMap.get(oldDepTime);
-            String[] parts = value.split(",", 2);
-            String trainID = parts[0];
-            String stationName = parts.length > 1 ? parts[1] : "";
+        if (trainMap.containsKey(oldDepTime)) {
+            String trainID = trainMap.get(oldDepTime);
+            String stationName = currentStation.getOrDefault(oldDepTime, "");
             int newDepTime = addMinutesToTime(oldDepTime, delayMinutes);
-            scheduleMap.remove(oldDepTime);
-            scheduleMap.put(newDepTime, trainID + "," + stationName);
+            trainMap.remove(oldDepTime);
+            currentStation.remove(oldDepTime);
+            trainMap.put(newDepTime, trainID);
+            currentStation.put(newDepTime, stationName);
             int currentDelay = isOnTime.getOrDefault(trainID, 0);
             isOnTime.put(trainID, currentDelay + delayMinutes);
             System.out.printf("Train %s delayed by %d minutes. New departure time: %04d\n", trainID, delayMinutes, newDepTime);
@@ -207,24 +218,26 @@ public class Train extends Stations {
     }
 
     public void cancelTrain(String trainID) {
-        boolean found = false;
-        for (var entry : scheduleMap.entrySet()) {
-            String[] parts = entry.getValue().split(",", 2);
-            if (parts[0].equalsIgnoreCase(trainID)) {
-                scheduleMap.remove(entry.getKey());
-                System.out.println("Train " + trainID + " has been cancelled.");
-                found = true;
+        Integer depTimeToRemove = null;
+        for (var entry : trainMap.entrySet()) {
+            if (entry.getValue().equalsIgnoreCase(trainID)) {
+                depTimeToRemove = entry.getKey();
                 break;
             }
         }
-        if (!found) {
+        if (depTimeToRemove != null) {
+            trainMap.remove(depTimeToRemove);
+            currentStation.remove(depTimeToRemove);
+            System.out.println("Train " + trainID + " has been cancelled.");
+        } else {
             System.out.println("No train found with the specified train ID.");
         }
     }
 
     public void cancelTrain(int departureTime) {
-        if (scheduleMap.containsKey(departureTime)) {
-            scheduleMap.remove(departureTime);
+        if (trainMap.containsKey(departureTime)) {
+            trainMap.remove(departureTime);
+            currentStation.remove(departureTime);
             System.out.println("Train at " + departureTime + " has been cancelled.");
         } else {
             System.out.println("No train found with the specified departure time.");

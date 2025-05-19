@@ -51,7 +51,6 @@ public class Stations {
         return travelTimeMap;
     }
     
-
     public int checkStationNumber(int stationNumber) {
         boolean validInput = false;
         while (!validInput) {
