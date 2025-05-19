@@ -9,52 +9,41 @@ class TrainPriorityQueue {
         mainQueue.addAll(station.trainQueue); // Add all trains from the station's queue to the main queue
     }
 
-    public void addTrain(Train train) {
-        if (train.priority <= 0) {
-            System.out.println("Train priority must be positive.");
-            return;
-        }
-        mainQueue.add(train);
-    }
-
-    public Train getNextTrain() {
-        return mainQueue.peek(); // Return the train with the highest priority
-    }
-
-    public void delayTrain(Train train, int delay) {
-        if (!mainQueue.contains(train)) {
-            System.out.println("Train not found in the main queue.");
-            return;
-        }
-        mainQueue.remove(train);
-        train.departureTime += delay; // Update the departure time
-
-        Train closestTrain = null;
-        int minTime = Integer.MAX_VALUE;
-
-        for (Train t : mainQueue) {
-            int timeDifference = Math.abs(t.departureTime - train.departureTime);
-            if (timeDifference < minTime) {
-                minTime = timeDifference;
-                closestTrain = t;
+    public void viewSchedule(Station station) {
+        for (Station st : schedule) {
+            if (st.name.equals(station.name)) {
+                System.out.println("Station: " + st.name);
+                st.displayTrains(); // Display trains in the station's queue
+                return;
             }
         }
-        if (closestTrain != null) {
-            train.priority += closestTrain.priority; // Update the priority based on the closest train's priority
-        }
+        System.out.println("Station not found in the schedule.");
+    }
 
-        mainQueue.add(train);
+    public Train getNextTrain(Station station) {
+        for (Station st : schedule) {
+            if (st.name.equals(station.name)) {
+                return st.getNextTrain(); // Return the train with the highest priority in the station's queue
+            }
+        }
+        System.out.println("Station not found in the schedule.");
+        return null; // Return null if the station is not found
+    }
+
+    public void delayTrain(Station station, Train train, int delay) {
+        for (Station st : schedule) {
+            if (st.name.equals(station.name)) {
+                st.delayTrain(train, delay); // Delay the train in the station's queue
+                return;
+            }
+        }
+        System.out.println("Station not found in the schedule.");
     }
 
     public void displayTrains() {
-        for (Station st : schedule) {
-            System.out.println("Station: " + st.name);
-            st.displayTrains(); // Display trains in each station's queue
-        }
-        System.out.println("Main Queue:");
-        for (Train train : mainQueue) {
-            System.out.println("Train ID: " + train.id + ", Priority: " + train.priority + ", Depart in: "
-                    + train.departureTime + " minutes");
+        for (Station station : schedule) {
+            System.out.println("Station: " + station.name);
+            station.displayTrains(); // Display trains in the station's queue
         }
     }
 
@@ -87,6 +76,10 @@ class TrainPriorityQueue {
             trainQueue.add(train); // Re-add the train to the queue with updated priority
         }
 
+        public Train getNextTrain() {
+            return trainQueue.peek(); // Return the train with the highest priority
+        }
+
         public void delayTrain(Train train, int delay) {
             trainQueue.remove(train);
             train.departureTime += delay; // Update the departure time
@@ -110,8 +103,8 @@ class TrainPriorityQueue {
 
         public void displayTrains() {
             for (Train train : trainQueue) {
-                System.out.println("Train ID: " + train.id + ", Priority: " + train.priority + ", Depart in: "
-                        + train.departureTime + " minutes");
+                System.out.println("Train ID: " + train.id + ", Priority: " + train.priority + ", Departure Time: " +
+                        + train.departureTime);
             }
         }
     }
@@ -137,21 +130,27 @@ class TrainPriorityQueue {
         Train train1 = trainQueue.new Train(1, 5, 10);
         Train train2 = trainQueue.new Train(2, 3, 20);
         Train train3 = trainQueue.new Train(3, 8, 15);
+        Train train4 = trainQueue.new Train(4, 2, 25);
+        Train train5 = trainQueue.new Train(5, 1, 30);
 
         station1.addTrain(train1);
         station1.addTrain(train2);
+        station1.addTrain(train4);
         station2.addTrain(train3);
-
+        
         trainQueue.addStation(station1);
         trainQueue.addStation(station2);
+        System.out.println("Trains in the queue:");
+
+        trainQueue.viewSchedule(station1);
 
         trainQueue.displayTrains();
- 
-        trainQueue.delayTrain(train1, 10);
+
+        trainQueue.delayTrain(station1, train1, 10);
 
         System.out.println("Trains in the queue after delay:");
         trainQueue.displayTrains();
 
-        System.out.println("Next train to depart: " + trainQueue.getNextTrain().id);
+        System.out.println("Next train to depart: " + trainQueue.getNextTrain(station2).id);
     }
 }
