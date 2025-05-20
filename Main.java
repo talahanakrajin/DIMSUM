@@ -71,8 +71,11 @@ public class Main {
                         break;
                     }
                     int nextDepTime = train.getTrainMap().firstEntry().getKey(); // Get the first entry (earliest departure time)
-                    String nextTrainID = train.getTrainMap().firstEntry().getValue(); // Train ID
-                    String nextStationName = train.getCurrentStation().getOrDefault(nextDepTime, ""); // Station name
+                    // Get the first train ID and station name for this departure time
+                    String nextTrainID = train.getTrainMap().firstEntry().getValue().get(0);
+                    String nextStationName = train.getCurrentStation().getOrDefault(nextDepTime, new java.util.ArrayList<>()).isEmpty()
+                        ? ""
+                        : train.getCurrentStation().get(nextDepTime).get(0);
 
                     String nextDepTimeStr = String.format("%04d", nextDepTime);
                     String hours = nextDepTimeStr.substring(0, 2);
@@ -104,7 +107,7 @@ public class Main {
                     sc.nextLine(); // consume newline
 
                     for (int i = 0; i < addCount; i++) {
-                        System.out.println("\nPlease enter the following details to add a new train schedule:\nWhich station do you want to add a train schedule to?\n\n1. Lebak Bulus (Start Terminus)\n2. Bundaran HI (End Terminus)\n3. Blok M)");
+                        System.out.println("\nPlease enter the following details to add a new train schedule:\nWhich station do you want to add a train schedule to?\n\n1. Lebak Bulus (Start Terminus)\n2. Bundaran HI (End Terminus)\n3. Blok M (Middle Parking)");
                         validInput = false;
                         String stationName = null;
                         while (!validInput) {
@@ -130,7 +133,7 @@ public class Main {
                                 stationName = "Bundaran HI";
                                 break;
                             case 3:
-                                System.out.println("You selected station: Blok M");
+                                System.out.println("You selected station: Blok M (Middle Parking)");
                                 stationName = "Blok M";
                                 break;
                         }
@@ -345,7 +348,22 @@ public class Main {
                     break;
                 case 8: // Simulate train running (this creates the whole schedule for the day)
                     System.out.println("Option 8 selected: Simulate trains running.");
-                    
+                    System.out.print("Enter the closing time (format: HHMM): ");
+                    int closingTime = 0;
+                    while (true) {
+                        if (sc.hasNextInt()) {
+                            closingTime = sc.nextInt();
+                            if (closingTime >= 0 && closingTime <= 2359) {
+                                break;
+                            } else {
+                                System.out.print("Please enter a valid time in HHMM format: ");
+                            }
+                        } else {
+                            System.out.print("Invalid input! Please enter a valid time in HHMM format: ");
+                            sc.next();
+                        }
+                    }
+                    train.simulateTrainRunning(closingTime);
                     break;
                 case 9: // Exit
                     System.out.println("Exiting the Train Management System. Goodbye!");
