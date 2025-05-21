@@ -37,13 +37,6 @@ public class Train extends Stations {
         return currentStation;
     }
 
-    // Add a new train schedule
-    public void addToScheduleMap(int departureTime, String trainID, String stationName) {
-        trainMap.computeIfAbsent(departureTime, k -> new ArrayList<>()).add(trainID);
-        currentStation.computeIfAbsent(departureTime, k -> new ArrayList<>()).add(stationName);
-        isOnTime.put(trainID, 0); // New train is on time by default
-    }
-
     // Add the delay in minutes to the HHMM time and return a new HHMM integer
     private int addMinutesToTime(int time, int minutesToAdd) {
         int hours = time / 100;
@@ -56,36 +49,7 @@ public class Train extends Stations {
         return (hours * 100) + minutes;
     }
 
-    // Print all or filtered by station
-    public void printSchedule(String selectedStation) {
-        boolean found = false;
-        for (var entry : trainMap.entrySet()) {
-            int depTime = entry.getKey();
-            List<String> trainIDs = entry.getValue();
-            List<String> stationNames = currentStation.getOrDefault(depTime, new ArrayList<>());
-            int count = Math.max(trainIDs.size(), stationNames.size());
-            for (int i = 0; i < count; i++) {
-                String trainID = i < trainIDs.size() ? trainIDs.get(i) : "";
-                String stationName = i < stationNames.size() ? stationNames.get(i) : "";
-                int delay = isOnTime.getOrDefault(trainID, 0);
-                if (selectedStation == null || stationName.equalsIgnoreCase(selectedStation)) {
-                    String depTimeStr = String.format("%04d", depTime);
-                    String hours = depTimeStr.substring(0, 2);
-                    String minutes = depTimeStr.substring(2, 4);
-                    System.out.printf("Train ID: %s | Departure Time: %s:%s | Station: %s", trainID, hours, minutes, stationName);
-                    if (delay > 0) {
-                        System.out.printf(" | delayed %d minutes", delay);
-                    }
-                    found = true;
-                    System.out.println();
-                }
-            }
-        }
-        if (!found) {
-            System.out.println("No trains found!");
-        }
-    }
-
+    /* INPUT FUNCTIONS */
     // Input and validate train ID
     public void inputTrainID(Scanner sc) {
         String inputTrainID;
@@ -145,6 +109,43 @@ public class Train extends Stations {
         return stationNum;
     }
 
+    // Add a new train schedule
+    public void addToScheduleMap(int departureTime, String trainID, String stationName) {
+        trainMap.computeIfAbsent(departureTime, k -> new ArrayList<>()).add(trainID); // Add departure time and trainID to trainMap
+        currentStation.computeIfAbsent(departureTime, k -> new ArrayList<>()).add(stationName); // Add departure time and stationName to currentStation (which is also a treemap)
+        isOnTime.put(trainID, 0); // Declare the trainID as on time, since it is just added
+    }
+
+    // Print all or filtered by station
+    public void printSchedule(String selectedStation) {
+        boolean found = false;
+        for (var entry : trainMap.entrySet()) {
+            int depTime = entry.getKey();
+            List<String> trainIDs = entry.getValue();
+            List<String> stationNames = currentStation.getOrDefault(depTime, new ArrayList<>());
+            int count = Math.max(trainIDs.size(), stationNames.size());
+            for (int i = 0; i < count; i++) {
+                String trainID = i < trainIDs.size() ? trainIDs.get(i) : "";
+                String stationName = i < stationNames.size() ? stationNames.get(i) : "";
+                int delay = isOnTime.getOrDefault(trainID, 0);
+                if (selectedStation == null || stationName.equalsIgnoreCase(selectedStation)) {
+                    String depTimeStr = String.format("%04d", depTime);
+                    String hours = depTimeStr.substring(0, 2);
+                    String minutes = depTimeStr.substring(2, 4);
+                    System.out.printf("Train ID: %s | Departure Time: %s:%s | Station: %s", trainID, hours, minutes, stationName);
+                    if (delay > 0) {
+                        System.out.printf(" | delayed %d minutes", delay);
+                    }
+                    found = true;
+                    System.out.println();
+                }
+            }
+        }
+        if (!found) {
+            System.out.println("No trains found!");
+        }
+    }
+
     /* Method overloading for rescheduling train */
     public void rescheduleTrain(int oldDepTime, int newDepTime, String newStation) {
         if (trainMap.containsKey(oldDepTime)) {
@@ -160,8 +161,8 @@ public class Train extends Stations {
             } else {
                 stationName = newStation;
             }
-            trainMap.put(newDepTime, List.of(trainID));
-            currentStation.put(newDepTime, List.of(stationName));
+            trainMap.put(newDepTime, new ArrayList<>(List.of(trainID)));
+            currentStation.put(newDepTime, new ArrayList<>(List.of(stationName)));
             System.out.println("Train rescheduled from " + oldDepTime + " to " + newDepTime);
         } else {
             System.out.println("No train found with the specified departure time.");
@@ -189,8 +190,8 @@ public class Train extends Stations {
             } else {
                 stationName = newStation;
             }
-            trainMap.put(newDepTime, List.of(trainID));
-            currentStation.put(newDepTime, List.of(stationName));
+            trainMap.put(newDepTime, new ArrayList<>(List.of(trainID)));
+            currentStation.put(newDepTime, new ArrayList<>(List.of(stationName)));
         } else {
             System.out.println("No train found with the specified train ID.");
         }
@@ -211,8 +212,8 @@ public class Train extends Stations {
             int newDepTime = addMinutesToTime(oldDepTime, delayMinutes);
             trainMap.remove(oldDepTime);
             currentStation.remove(oldDepTime);
-            trainMap.put(newDepTime, List.of(trainID));
-            currentStation.put(newDepTime, List.of(stationName));
+            trainMap.put(newDepTime, new ArrayList<>(List.of(trainID)));
+            currentStation.put(newDepTime, new ArrayList<>(List.of(stationName)));
             int currentDelay = isOnTime.getOrDefault(trainID, 0);
             isOnTime.put(trainID, currentDelay + delayMinutes);
             System.out.printf("Train %s delayed by %d minutes. New departure time: %04d\n", trainID, delayMinutes, newDepTime);
@@ -230,8 +231,8 @@ public class Train extends Stations {
             int newDepTime = addMinutesToTime(oldDepTime, delayMinutes);
             trainMap.remove(oldDepTime);
             currentStation.remove(oldDepTime);
-            trainMap.put(newDepTime, List.of(trainID));
-            currentStation.put(newDepTime, List.of(stationName));
+            trainMap.put(newDepTime, new ArrayList<>(List.of(trainID)));
+            currentStation.put(newDepTime, new ArrayList<>(List.of(stationName)));
             int currentDelay = isOnTime.getOrDefault(trainID, 0);
             isOnTime.put(trainID, currentDelay + delayMinutes);
             System.out.printf("Train %s delayed by %d minutes. New departure time: %04d\n", trainID, delayMinutes, newDepTime);
@@ -267,6 +268,7 @@ public class Train extends Stations {
         }
     }
 
+    // Train running simulation (Still on progress!)
     public void simulateTrainRunning(int closingTime) {
         if (currentStation.isEmpty()) {
             System.out.println("currentStation is empty.");
@@ -345,6 +347,31 @@ public class Train extends Stations {
         for (SimStep step : stepsToAdd) {
             trainMap.computeIfAbsent(step.time, k -> new ArrayList<>()).add(step.trainID);
             currentStation.computeIfAbsent(step.time, k -> new ArrayList<>()).add(step.stationName);
+        }
+    }
+
+    // Print the next departing train
+    public void printNextTrain() {
+        if (getTrainMap().isEmpty()) {
+            System.out.println("No trains scheduled!");
+            return;
+        }
+        int nextDepTime = getTrainMap().firstEntry().getKey(); // Get the first entry (earliest departure time)
+        // Get the first train ID and station name for this departure time
+        String nextTrainID = getTrainMap().firstEntry().getValue().get(0);
+        String nextStationName = getCurrentStation().getOrDefault(nextDepTime, new java.util.ArrayList<>()).isEmpty()
+            ? ""
+            : getCurrentStation().get(nextDepTime).get(0);
+
+        String nextDepTimeStr = String.format("%04d", nextDepTime);
+        String hours = nextDepTimeStr.substring(0, 2);
+        String minutes = nextDepTimeStr.substring(2, 4);
+
+        int delay = isOnTime.getOrDefault(nextTrainID, 0);
+        if (delay > 0) {
+            System.out.printf("Next train departing:\nTrain ID: %s | Departure Time: %s:%s (Delayed by %d minutes) | Station: %s\n", nextTrainID, hours, minutes, delay, nextStationName);
+        } else {
+            System.out.printf("Next train departing:\nTrain ID: %s | Departure Time: %s:%s | Station: %s\n", nextTrainID, hours, minutes, nextStationName);
         }
     }
 
