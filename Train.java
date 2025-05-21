@@ -146,6 +146,31 @@ public class Train extends Stations {
         }
     }
 
+    // Print the next departing train
+    public void printNextTrain() {
+        if (getTrainMap().isEmpty()) {
+            System.out.println("No trains scheduled!");
+            return;
+        }
+        int nextDepTime = getTrainMap().firstEntry().getKey(); // Get the first entry (earliest departure time)
+        // Get the first train ID and station name for this departure time
+        String nextTrainID = getTrainMap().firstEntry().getValue().get(0);
+        String nextStationName = getCurrentStation().getOrDefault(nextDepTime, new java.util.ArrayList<>()).isEmpty()
+            ? ""
+            : getCurrentStation().get(nextDepTime).get(0);
+
+        String nextDepTimeStr = String.format("%04d", nextDepTime);
+        String hours = nextDepTimeStr.substring(0, 2);
+        String minutes = nextDepTimeStr.substring(2, 4);
+
+        int delay = isOnTime.getOrDefault(nextTrainID, 0);
+        if (delay > 0) {
+            System.out.printf("Next train departing:\nTrain ID: %s | Departure Time: %s:%s (Delayed by %d minutes) | Station: %s\n", nextTrainID, hours, minutes, delay, nextStationName);
+        } else {
+            System.out.printf("Next train departing:\nTrain ID: %s | Departure Time: %s:%s | Station: %s\n", nextTrainID, hours, minutes, nextStationName);
+        }
+    }
+
     /* Method overloading for rescheduling train */
     public void rescheduleTrain(int oldDepTime, int newDepTime, String newStation) {
         if (trainMap.containsKey(oldDepTime)) {
@@ -349,32 +374,6 @@ public class Train extends Stations {
             currentStation.computeIfAbsent(step.time, k -> new ArrayList<>()).add(step.stationName);
         }
     }
-
-    // Print the next departing train
-    public void printNextTrain() {
-        if (getTrainMap().isEmpty()) {
-            System.out.println("No trains scheduled!");
-            return;
-        }
-        int nextDepTime = getTrainMap().firstEntry().getKey(); // Get the first entry (earliest departure time)
-        // Get the first train ID and station name for this departure time
-        String nextTrainID = getTrainMap().firstEntry().getValue().get(0);
-        String nextStationName = getCurrentStation().getOrDefault(nextDepTime, new java.util.ArrayList<>()).isEmpty()
-            ? ""
-            : getCurrentStation().get(nextDepTime).get(0);
-
-        String nextDepTimeStr = String.format("%04d", nextDepTime);
-        String hours = nextDepTimeStr.substring(0, 2);
-        String minutes = nextDepTimeStr.substring(2, 4);
-
-        int delay = isOnTime.getOrDefault(nextTrainID, 0);
-        if (delay > 0) {
-            System.out.printf("Next train departing:\nTrain ID: %s | Departure Time: %s:%s (Delayed by %d minutes) | Station: %s\n", nextTrainID, hours, minutes, delay, nextStationName);
-        } else {
-            System.out.printf("Next train departing:\nTrain ID: %s | Departure Time: %s:%s | Station: %s\n", nextTrainID, hours, minutes, nextStationName);
-        }
-    }
-
     // Helper class for simulation steps
     private static class SimStep {
         int time;
