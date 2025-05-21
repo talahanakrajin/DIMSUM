@@ -356,6 +356,7 @@ public class Main {
 
         // Add schedules (n = number of schedules)
         int n = 100; 
+        int depTime = 500; // Start from 05:00
 
         // Time and space complexity for addToScheduleMap (adding n schedules)
         Runtime runtime = Runtime.getRuntime();
@@ -363,10 +364,21 @@ public class Main {
         long beforeUsedMem = runtime.totalMemory() - runtime.freeMemory();
         long startTime = System.nanoTime();
         for (int i = 0; i < n; i++) {
+            if (depTime > 559) break; // Do not allow depTime above 0559
+
             String trainID = String.format("TS%04d", i);
-            int depTime = 500 + i;
-            String station = train.getStationMap().get(1);
+            String station = train.getStationMap().get(1); // this case adding to lebak bulus
             train.addToScheduleMap(depTime, trainID, station);
+
+            // Increment the departure time by 5 minutes using clock logic
+            int hour = depTime / 100;
+            int minute = depTime % 100;
+            minute += 5;
+            if (minute >= 60) {
+                hour++;
+                minute -= 60;
+            }
+            depTime = hour * 100 + minute;
         }
         long endTime = System.nanoTime();
         runtime.gc();
@@ -391,7 +403,7 @@ public class Main {
         System.out.println("Time for printSchedule (all): " + elapsedMs + " ms");
         System.out.println("Memory used by printSchedule (all): " + usedMemMB + " MB\n");
 
-        // Time and space complexity for printSchedule (filtered)
+        // Time and space complexity for printSchedule (filtered by station)
         String testStation = train.getStationMap().get(1);
         runtime.gc();
         beforeUsedMem = runtime.totalMemory() - runtime.freeMemory();
@@ -403,8 +415,8 @@ public class Main {
 
         elapsedMs = (endTime - startTime) / 1000000.0;
         usedMemMB = (afterUsedMem - beforeUsedMem) / (1024.0 * 1024.0);
-        System.out.println("Time for printSchedule (filtered): " + elapsedMs + " ms");
-        System.out.println("Memory used by printSchedule (filtered): " + usedMemMB + " MB\n");
+        System.out.println("Time for printSchedule (filtered by station): " + elapsedMs + " ms");
+        System.out.println("Memory used by printSchedule (filtered by station): " + usedMemMB + " MB\n");
 
         // Time and space complexity for findNextTrain
         runtime.gc();
@@ -420,9 +432,10 @@ public class Main {
         System.out.println("Time for findNextTrain: " + elapsedMs + " ms");
         System.out.println("Memory used by findNextTrain: " + usedMemMB + " MB\n");
 
+        /* TIME AND SPACE COMPLEXITY FOR [reschedule, delay, and cancel] by using train ID */
         // Time and space complexity for rescheduleTrain by TrainID
-        String rescheduleID = "TS0001";
-        int newDepTime = 1120;
+        String rescheduleID = "TS0001"; // example train ID
+        int newDepTime = 1120; // example new departure time
         String newStation = train.getStationMap().get(2);
         runtime.gc();
         beforeUsedMem = runtime.totalMemory() - runtime.freeMemory();
@@ -438,11 +451,11 @@ public class Main {
         System.out.println("Memory used by rescheduleTrain: " + usedMemMB + " MB\n");
 
         // Time and space complexity for delayTrain by TrainID
-        String delayID = "TS0002";
+        String delayID = "TS0002"; // example train ID to be delayed
         runtime.gc();
         beforeUsedMem = runtime.totalMemory() - runtime.freeMemory();
         startTime = System.nanoTime();
-        train.delayTrain(delayID, 10);
+        train.delayTrain(delayID, 10); // example delay in minutes
         endTime = System.nanoTime();
         runtime.gc();
         afterUsedMem = runtime.totalMemory() - runtime.freeMemory();
@@ -453,7 +466,7 @@ public class Main {
         System.out.println("Memory used by delayTrain: " + usedMemMB + " MB\n");
 
         // Time and space complexity for cancelTrain by TrainID
-        String cancelID = "TS0003";
+        String cancelID = "TS0003"; // example train ID to be canceled
         runtime.gc();
         beforeUsedMem = runtime.totalMemory() - runtime.freeMemory();
         startTime = System.nanoTime();
@@ -467,8 +480,56 @@ public class Main {
         System.out.println("Time for cancelTrain by ID: " + elapsedMs + " ms");
         System.out.println("Memory used by cancelTrain: " + usedMemMB + " MB\n");
 
+        /* TIME AND SPACE COMPLEXITY FOR [reschedule, delay, and cancel] by using old Departure Time */
+        // Time and space complexity for rescheduleTrain by old Departure Time
+        int oldDepTime = 0500; // example train ID
+        newDepTime = 1120; // example new departure time
+        newStation = train.getStationMap().get(5); // example new station
+        runtime.gc();
+        beforeUsedMem = runtime.totalMemory() - runtime.freeMemory();
+        startTime = System.nanoTime();
+        train.rescheduleTrain(oldDepTime, newDepTime, newStation);
+        endTime = System.nanoTime();
+        runtime.gc();
+        afterUsedMem = runtime.totalMemory() - runtime.freeMemory();
+
+        elapsedMs = (endTime - startTime) / 1000000.0;
+        usedMemMB = (afterUsedMem - beforeUsedMem) / (1024.0 * 1024.0);
+        System.out.println("Time for rescheduleTrain by ID: " + elapsedMs + " ms");
+        System.out.println("Memory used by rescheduleTrain: " + usedMemMB + " MB\n");
+
+        // Time and space complexity for delayTrain by old Departure Time
+        oldDepTime = 0510; // example train ID to be delayed
+        runtime.gc();
+        beforeUsedMem = runtime.totalMemory() - runtime.freeMemory();
+        startTime = System.nanoTime();
+        train.delayTrain(oldDepTime, 10); // example delay in minutes
+        endTime = System.nanoTime();
+        runtime.gc();
+        afterUsedMem = runtime.totalMemory() - runtime.freeMemory();
+
+        elapsedMs = (endTime - startTime) / 1000000.0;
+        usedMemMB = (afterUsedMem - beforeUsedMem) / (1024.0 * 1024.0);
+        System.out.println("Time for delayTrain by ID: " + elapsedMs + " ms");
+        System.out.println("Memory used by delayTrain: " + usedMemMB + " MB\n");
+
+        // Time and space complexity for cancelTrain by TrainID
+        oldDepTime = 0530; // example train ID to be canceled
+        runtime.gc();
+        beforeUsedMem = runtime.totalMemory() - runtime.freeMemory();
+        startTime = System.nanoTime();
+        train.cancelTrain(oldDepTime);
+        endTime = System.nanoTime();
+        runtime.gc();
+        afterUsedMem = runtime.totalMemory() - runtime.freeMemory();
+
+        elapsedMs = (endTime - startTime) / 1000000.0;
+        usedMemMB = (afterUsedMem - beforeUsedMem) / (1024.0 * 1024.0);
+        System.out.println("Time for cancelTrain by ID: " + elapsedMs + " ms");
+        System.out.println("Memory used by cancelTrain: " + usedMemMB + " MB\n");
+
         // Time and space complexity for simulateTrainRunning
-        int closingTime = 2300;
+        int closingTime = 2300; // example closing time
         runtime.gc();
         beforeUsedMem = runtime.totalMemory() - runtime.freeMemory();
         startTime = System.nanoTime();
