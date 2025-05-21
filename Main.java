@@ -3,7 +3,6 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         // Commented out user interaction code for complexity analysis
-        /*
         int choice;
         int stationNumber = 0;
         Scanner sc = new Scanner(System.in);
@@ -36,7 +35,7 @@ public class Main {
             sc.nextLine(); // Consume the newline character
 
             switch (choice) {
-                /* For the users! 
+                /* For the users! */
                 case 1: // View full schedule
                     System.out.println("Option 1 selected: View full schedule.");
                     System.out.println("\n-- Train Schedule --");
@@ -64,7 +63,7 @@ public class Main {
                     train.printNextTrain();
                     break;
 
-                /* For the manager! 
+                /* For the manager! */
                 case 4: // Add train schedule(s)
                     System.out.println("\nOption 4 selected: Add train schedule(s).\n");
                     System.out.print("How many schedules do you want to add? ");
@@ -89,12 +88,12 @@ public class Main {
                             if (sc.hasNextInt()) {
                                 stationNumber = sc.nextInt();
                                 if (stationNumber < 1 || stationNumber > 3) {
-                                    System.out.print("Invalid station number! Please enter a number between 1 - 3: ");
+                                    System.out.print("Invalid station Number! Please enter a Number between 1 - 3: ");
                                 } else {
                                     validInput = true;
                                 }
                             } else {
-                                System.out.print("Invalid input! Please enter a number between 1 - 3: ");
+                                System.out.print("Invalid input! Please enter a Number between 1 - 3: ");
                                 sc.next(); // Consume invalid input
                             }
                         }
@@ -135,9 +134,9 @@ public class Main {
                         if (sc.hasNextInt()) {
                             rescheduleCount = sc.nextInt();
                             if (rescheduleCount > 0) break;
-                            else System.out.print("Please enter a positive number: ");
+                            else System.out.print("Please enter a positive Number: ");
                         } else {
-                            System.out.print("Invalid input! Please enter a positive number: ");
+                            System.out.print("Invalid input! Please enter a positive Number: ");
                             sc.next();
                         }
                     }
@@ -201,9 +200,9 @@ public class Main {
                         if (sc.hasNextInt()) {
                             delayCount = sc.nextInt();
                             if (delayCount > 0) break;
-                            else System.out.print("Please enter a positive number: ");
+                            else System.out.print("Please enter a positive Number: ");
                         } else {
-                            System.out.print("Invalid input! Please enter a positive number: ");
+                            System.out.print("Invalid input! Please enter a positive Number: ");
                             sc.next();
                         }
                     }
@@ -239,9 +238,9 @@ public class Main {
                                     if (sc.hasNextInt()) {
                                         delayMinutes = sc.nextInt();
                                         if (delayMinutes >= 0) break;
-                                        else System.out.print("Please enter a non-negative number: ");
+                                        else System.out.print("Please enter a non-negative Number: ");
                                     } else {
-                                        System.out.print("Invalid input! Please enter a non-negative number: ");
+                                        System.out.print("Invalid input! Please enter a non-negative Number: ");
                                         sc.next();
                                     }
                                 }
@@ -259,9 +258,9 @@ public class Main {
                                     if (sc.hasNextInt()) {
                                         delayMinutes = sc.nextInt();
                                         if (delayMinutes >= 0) break;
-                                        else System.out.print("Please enter a non-negative number: ");
+                                        else System.out.print("Please enter a non-negative Number: ");
                                     } else {
-                                        System.out.print("Invalid input! Please enter a non-negative number: ");
+                                        System.out.print("Invalid input! Please enter a non-negative Number: ");
                                         sc.next();
                                     }
                                 }
@@ -278,9 +277,9 @@ public class Main {
                         if (sc.hasNextInt()) {
                             cancelCount = sc.nextInt();
                             if (cancelCount > 0) break;
-                            else System.out.print("Please enter a positive number: ");
+                            else System.out.print("Please enter a positive Number: ");
                         } else {
-                            System.out.print("Invalid input! Please enter a positive number: ");
+                            System.out.print("Invalid input! Please enter a positive Number: ");
                             sc.next();
                         }
                     }
@@ -344,19 +343,21 @@ public class Main {
                     System.out.println("Exiting the Train Management System. Goodbye!");
                     break;
                 default:
-                    System.out.println("Invalid choice. Please select a number between 1 and 9.");
+                    System.out.println("Invalid choice. Please select a Number between 1 and 9.");
             }
         } while (choice != 9); // while the user does not select 8 (exit) do the switch statements
         sc.close(); 
-        */
-        
 
+        
+        /*
+        MAKE THE TIME AND SPACE COMPLEXITY TESTING IN A METHOD TO REDUCE CLUTTER
         // Begin: Direct data input for complexity analysis
         Train train = new Train(null, 0);
 
-        // Add schedules (n = number of schedules)
-        int n = 100; 
-        int depTime = 500; // Start from 05:00
+        // Add schedules (n = Number of schedules)
+        int n = 10000; 
+        int depTime = 500; // Start from 05:00 (integer 500, but always use 4-digit format for display/search)
+        int interval = 5; // 5 minutes interval
 
         // Time and space complexity for addToScheduleMap (adding n schedules)
         Runtime runtime = Runtime.getRuntime();
@@ -364,30 +365,37 @@ public class Main {
         long beforeUsedMem = runtime.totalMemory() - runtime.freeMemory();
         long startTime = System.nanoTime();
         for (int i = 0; i < n; i++) {
-            if (depTime > 559) break; // Do not allow depTime above 0559
-
             String trainID = String.format("TS%04d", i);
-            String station = train.getStationMap().get(1); // this case adding to lebak bulus
+            String station = train.getStationMap().get(1);
             train.addToScheduleMap(depTime, trainID, station);
+
+            // Debug print
+            System.out.println("Added depTime: " + String.format("%04d", depTime));
 
             // Increment the departure time by 5 minutes using clock logic
             int hour = depTime / 100;
             int minute = depTime % 100;
-            minute += 5;
+            minute += interval;
             if (minute >= 60) {
                 hour++;
                 minute -= 60;
             }
+            if (hour > 23) {
+                hour = 0;
+            }
             depTime = hour * 100 + minute;
+            if (depTime > 2359) {
+                depTime = 0;
+            }
         }
         long endTime = System.nanoTime();
         runtime.gc();
         long afterUsedMem = runtime.totalMemory() - runtime.freeMemory();
 
         double elapsedMs = (endTime - startTime) / 1000000.0;
-        double usedMemMB = (afterUsedMem - beforeUsedMem) / (1024.0 * 1024.0);
+        double usedMemKB = (afterUsedMem - beforeUsedMem) / (1024.0);
         System.out.println("Time for adding " + n + " schedules: " + elapsedMs + " ms");
-        System.out.println("Memory used by addToScheduleMap: " + usedMemMB + " MB\n");
+        System.out.println("Memory used by addToScheduleMap: " + usedMemKB + " KB\n");
 
         // Time and space complexity for printSchedule (full)
         runtime.gc();
@@ -399,9 +407,9 @@ public class Main {
         afterUsedMem = runtime.totalMemory() - runtime.freeMemory();
 
         elapsedMs = (endTime - startTime) / 1000000.0;
-        usedMemMB = (afterUsedMem - beforeUsedMem) / (1024.0 * 1024.0);
+        usedMemKB = (afterUsedMem - beforeUsedMem) / (1024.0);
         System.out.println("Time for printSchedule (all): " + elapsedMs + " ms");
-        System.out.println("Memory used by printSchedule (all): " + usedMemMB + " MB\n");
+        System.out.println("Memory used by printSchedule (all): " + usedMemKB + " KB\n");
 
         // Time and space complexity for printSchedule (filtered by station)
         String testStation = train.getStationMap().get(1);
@@ -414,9 +422,9 @@ public class Main {
         afterUsedMem = runtime.totalMemory() - runtime.freeMemory();
 
         elapsedMs = (endTime - startTime) / 1000000.0;
-        usedMemMB = (afterUsedMem - beforeUsedMem) / (1024.0 * 1024.0);
+        usedMemKB = (afterUsedMem - beforeUsedMem) / (1024.0);
         System.out.println("Time for printSchedule (filtered by station): " + elapsedMs + " ms");
-        System.out.println("Memory used by printSchedule (filtered by station): " + usedMemMB + " MB\n");
+        System.out.println("Memory used by printSchedule (filtered by station): " + usedMemKB + " KB\n");
 
         // Time and space complexity for findNextTrain
         runtime.gc();
@@ -428,11 +436,11 @@ public class Main {
         afterUsedMem = runtime.totalMemory() - runtime.freeMemory();
 
         elapsedMs = (endTime - startTime) / 1000000.0;
-        usedMemMB = (afterUsedMem - beforeUsedMem) / (1024.0 * 1024.0);
+        usedMemKB = (afterUsedMem - beforeUsedMem) / (1024.0);
         System.out.println("Time for findNextTrain: " + elapsedMs + " ms");
-        System.out.println("Memory used by findNextTrain: " + usedMemMB + " MB\n");
+        System.out.println("Memory used by findNextTrain: " + usedMemKB + " KB\n");
 
-        /* TIME AND SPACE COMPLEXITY FOR [reschedule, delay, and cancel] by using train ID */
+        /* TIME AND SPACE COMPLEXITY FOR [reschedule, delay, and cancel] by using train ID 
         // Time and space complexity for rescheduleTrain by TrainID
         String rescheduleID = "TS0001"; // example train ID
         int newDepTime = 1120; // example new departure time
@@ -446,9 +454,9 @@ public class Main {
         afterUsedMem = runtime.totalMemory() - runtime.freeMemory();
 
         elapsedMs = (endTime - startTime) / 1000000.0;
-        usedMemMB = (afterUsedMem - beforeUsedMem) / (1024.0 * 1024.0);
+        usedMemKB = (afterUsedMem - beforeUsedMem) / (1024.0);
         System.out.println("Time for rescheduleTrain by ID: " + elapsedMs + " ms");
-        System.out.println("Memory used by rescheduleTrain: " + usedMemMB + " MB\n");
+        System.out.println("Memory used by rescheduleTrain: " + usedMemKB + " KB\n");
 
         // Time and space complexity for delayTrain by TrainID
         String delayID = "TS0002"; // example train ID to be delayed
@@ -461,9 +469,9 @@ public class Main {
         afterUsedMem = runtime.totalMemory() - runtime.freeMemory();
 
         elapsedMs = (endTime - startTime) / 1000000.0;
-        usedMemMB = (afterUsedMem - beforeUsedMem) / (1024.0 * 1024.0);
+        usedMemKB = (afterUsedMem - beforeUsedMem) / (1024.0);
         System.out.println("Time for delayTrain by ID: " + elapsedMs + " ms");
-        System.out.println("Memory used by delayTrain: " + usedMemMB + " MB\n");
+        System.out.println("Memory used by delayTrain: " + usedMemKB + " KB\n");
 
         // Time and space complexity for cancelTrain by TrainID
         String cancelID = "TS0003"; // example train ID to be canceled
@@ -476,13 +484,13 @@ public class Main {
         afterUsedMem = runtime.totalMemory() - runtime.freeMemory();
 
         elapsedMs = (endTime - startTime) / 1000000.0;
-        usedMemMB = (afterUsedMem - beforeUsedMem) / (1024.0 * 1024.0);
+        usedMemKB = (afterUsedMem - beforeUsedMem) / (1024.0);
         System.out.println("Time for cancelTrain by ID: " + elapsedMs + " ms");
-        System.out.println("Memory used by cancelTrain: " + usedMemMB + " MB\n");
+        System.out.println("Memory used by cancelTrain: " + usedMemKB + " KB\n");
 
-        /* TIME AND SPACE COMPLEXITY FOR [reschedule, delay, and cancel] by using old Departure Time */
+        /* TIME AND SPACE COMPLEXITY FOR [reschedule, delay, and cancel] by using old Departure Time 
         // Time and space complexity for rescheduleTrain by old Departure Time
-        int oldDepTime = 0500; // example train ID
+        int oldDepTime = 500; // example: 0500
         newDepTime = 1120; // example new departure time
         newStation = train.getStationMap().get(5); // example new station
         runtime.gc();
@@ -494,12 +502,12 @@ public class Main {
         afterUsedMem = runtime.totalMemory() - runtime.freeMemory();
 
         elapsedMs = (endTime - startTime) / 1000000.0;
-        usedMemMB = (afterUsedMem - beforeUsedMem) / (1024.0 * 1024.0);
-        System.out.println("Time for rescheduleTrain by ID: " + elapsedMs + " ms");
-        System.out.println("Memory used by rescheduleTrain: " + usedMemMB + " MB\n");
+        usedMemKB = (afterUsedMem - beforeUsedMem) / (1024.0);
+        System.out.println("Time for rescheduleTrain by old departure time: " + elapsedMs + " ms");
+        System.out.println("Memory used by rescheduleTrain: " + usedMemKB + " KB\n");
 
         // Time and space complexity for delayTrain by old Departure Time
-        oldDepTime = 0510; // example train ID to be delayed
+        oldDepTime = 510; // example time 0510
         runtime.gc();
         beforeUsedMem = runtime.totalMemory() - runtime.freeMemory();
         startTime = System.nanoTime();
@@ -509,12 +517,12 @@ public class Main {
         afterUsedMem = runtime.totalMemory() - runtime.freeMemory();
 
         elapsedMs = (endTime - startTime) / 1000000.0;
-        usedMemMB = (afterUsedMem - beforeUsedMem) / (1024.0 * 1024.0);
-        System.out.println("Time for delayTrain by ID: " + elapsedMs + " ms");
-        System.out.println("Memory used by delayTrain: " + usedMemMB + " MB\n");
+        usedMemKB = (afterUsedMem - beforeUsedMem) / (1024.0);
+        System.out.println("Time for delayTrain by old departure time: " + elapsedMs + " ms");
+        System.out.println("Memory used by delayTrain: " + usedMemKB + " KB\n");
 
-        // Time and space complexity for cancelTrain by TrainID
-        oldDepTime = 0530; // example train ID to be canceled
+        // Time and space complexity for cancelTrain by old Departure Time
+        oldDepTime = 530; // example time 0530
         runtime.gc();
         beforeUsedMem = runtime.totalMemory() - runtime.freeMemory();
         startTime = System.nanoTime();
@@ -524,9 +532,9 @@ public class Main {
         afterUsedMem = runtime.totalMemory() - runtime.freeMemory();
 
         elapsedMs = (endTime - startTime) / 1000000.0;
-        usedMemMB = (afterUsedMem - beforeUsedMem) / (1024.0 * 1024.0);
-        System.out.println("Time for cancelTrain by ID: " + elapsedMs + " ms");
-        System.out.println("Memory used by cancelTrain: " + usedMemMB + " MB\n");
+        usedMemKB = (afterUsedMem - beforeUsedMem) / (1024.0);
+        System.out.println("Time for cancelTrain by old departure time: " + elapsedMs + " ms");
+        System.out.println("Memory used by cancelTrain: " + usedMemKB + " KB\n");
 
         // Time and space complexity for simulateTrainRunning
         int closingTime = 2300; // example closing time
@@ -539,8 +547,9 @@ public class Main {
         afterUsedMem = runtime.totalMemory() - runtime.freeMemory();
 
         elapsedMs = (endTime - startTime) / 1000000.0;
-        usedMemMB = (afterUsedMem - beforeUsedMem) / (1024.0 * 1024.0);
+        usedMemKB = (afterUsedMem - beforeUsedMem) / (1024.0);
         System.out.println("Time for simulateTrainRunning: " + elapsedMs + " ms");
-        System.out.println("Memory used by simulateTrainRunning: " + usedMemMB + " MB\n");
+        System.out.println("Memory used by simulateTrainRunning: " + usedMemKB + " KB\n");
+        */
     }
 }
