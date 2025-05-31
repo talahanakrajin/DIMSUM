@@ -20,14 +20,20 @@ class TrainPriorityQueue {
         System.out.println("Station not found in the schedule.");
     }
 
-    public Train getNextTrain(Station station) {
+    public void getNextTrain(Station station) {
         for (Station st : schedule) {
             if (st.name.equals(station.name)) {
-                return st.getNextTrain(); // Return the train with the highest priority in the station's queue
+                Train next = st.getNextTrain(); // Get the train with the highest priority
+                if (next != null) {
+                    System.out.println("Next train at " + st.name + ": ID=" + next.id + ", Priority=" + next.priority
+                            + ", Departure Time=" + next.departureTime);
+                } else {
+                    System.out.println("No trains available at " + st.name);
+                }
+                return;
             }
         }
         System.out.println("Station not found in the schedule.");
-        return null; // Return null if the station is not found
     }
 
     public void delayTrain(Station station, Train train, int delay) {
@@ -44,6 +50,16 @@ class TrainPriorityQueue {
         for (Station station : schedule) {
             System.out.println("Station: " + station.name);
             station.displayTrains(); // Display trains in the station's queue
+        }
+    }
+
+    // Add this function to the main class
+    public void cancelFunction() {
+        for (Station station : schedule) {
+            Train train = station.trainQueue.peek();
+            if (train != null) {
+                station.cancelTrain(train);
+            }
         }
     }
 
@@ -70,10 +86,19 @@ class TrainPriorityQueue {
             }
         }
 
-        public void rescheduleTrain(Train train, int newPriority) {
-            trainQueue.remove(train); // Remove the train from the queue
-            train.priority = newPriority; // Update the priority
-            trainQueue.add(train); // Re-add the train to the queue with updated priority
+        public void rescheduleTrain(Train train, int newDepartureTime) {
+            if (trainQueue.contains(train)) {
+                trainQueue.remove(train);
+            } else {
+                System.out.println("Train not found in the station's queue.");
+                return;
+            }
+            if (newDepartureTime < 0) {
+                System.out.println("Invalid departure time.");
+                return;
+            }
+            train.departureTime = newDepartureTime;
+            trainQueue.add(train);
         }
 
         public Train getNextTrain() {
@@ -104,7 +129,7 @@ class TrainPriorityQueue {
         public void displayTrains() {
             for (Train train : trainQueue) {
                 System.out.println("Train ID: " + train.id + ", Priority: " + train.priority + ", Departure Time: " +
-                        + train.departureTime);
+                        +train.departureTime);
             }
         }
     }
@@ -123,34 +148,82 @@ class TrainPriorityQueue {
 
     public static void main(String[] args) {
         TrainPriorityQueue trainQueue = new TrainPriorityQueue();
+        PerformanceMetrics pm = new PerformanceMetrics();
+
+        Random random = new Random();
 
         Station station1 = trainQueue.new Station("Station 1");
-        Station station2 = trainQueue.new Station("Station 2");
-
-        Train train1 = trainQueue.new Train(1, 5, 10);
-        Train train2 = trainQueue.new Train(2, 3, 20);
-        Train train3 = trainQueue.new Train(3, 8, 15);
-        Train train4 = trainQueue.new Train(4, 2, 25);
-        Train train5 = trainQueue.new Train(5, 1, 30);
-
-        station1.addTrain(train1);
-        station1.addTrain(train2);
-        station1.addTrain(train4);
-        station2.addTrain(train3);
         
-        trainQueue.addStation(station1);
-        trainQueue.addStation(station2);
-        System.out.println("Trains in the queue:");
+        Runnable task0 = () -> {
+            for (int i = 0; i < 10; i++) {
+                Train train = trainQueue.new Train(i, random.nextInt(100), random.nextInt(100));
+                station1.addTrain(train);
+            }
+        };
+        
+        // Prepare stations and trains
+        /*for (int i = 0; i < 10000; i++) {
+            Station station = trainQueue.new Station("Station " + i);
+            for (int j = 0; j < 5; j++) {
+                Train train = trainQueue.new Train(j, random.nextInt(100), random.nextInt(100));
+                station.addTrain(train);
+            }
+            trainQueue.addStation(station);
+        }*/
 
-        trainQueue.viewSchedule(station1);
+        // Test delayTrain
+        /*Runnable task1 = () -> {
+            for (int i = 0; i < 10000; i++) {
+                trainQueue.delayTrain(trainQueue.schedule.get(i), trainQueue.schedule.get(i).trainQueue.peek(),
+                        random.nextInt(20));
+            }
+        };*/
 
-        trainQueue.displayTrains();
+        // Test addStation
+        /*Runnable task2 = () -> {
+            for (int i = 10000; i < 11000; i++) {
+                Station station = trainQueue.new Station("Station " + i);
+                for (int j = 0; j < 5; j++) {
+                    Train train = trainQueue.new Train(j, random.nextInt(100), random.nextInt(100));
+                    station.addTrain(train);
+                }
+                trainQueue.addStation(station);
+            }
+        };*/
 
-        trainQueue.delayTrain(station1, train1, 10);
+        // Test viewSchedule
+        /*Runnable task3 = () -> {
+            for (int i = 0; i < 100; i++) {
+                trainQueue.viewSchedule(trainQueue.schedule.get(i));
+            }
+        };*/
 
-        System.out.println("Trains in the queue after delay:");
-        trainQueue.displayTrains();
+        // Test getNextTrain
+        /*Runnable task4 = () -> {
+            for (int i = 0; i < 100; i++) {
+                trainQueue.getNextTrain(trainQueue.schedule.get(i));
+            }
+        };*/
 
-        System.out.println("Next train to depart: " + trainQueue.getNextTrain(station2).id);
+        // Test displayTrains
+        /*Runnable task5 = () -> {
+            trainQueue.displayTrains();
+        };*/
+
+        // Test cancelTrain via cancelFunction
+        /*Runnable task6 = () -> {
+            for (Station station : new ArrayList<>(trainQueue.schedule)) {
+                Train train = station.trainQueue.peek();
+                if (train != null) {
+                    station.cancelTrain(train);
+                }
+            }
+        };*/
+
+
+        System.out.println("Measuring performance metrics...");
+        pm.measureRuntime(task0);
+        
     }
+
 }
