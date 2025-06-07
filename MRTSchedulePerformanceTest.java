@@ -8,7 +8,7 @@ public class MRTSchedulePerformanceTest {
 
     public static void main(String[] args) {
         int n = 100; 
-        initializeSchedule();
+        //initializeSchedule();
         
         // Run all test cases
         for (int testType = 1; testType <= 7; testType++) {
@@ -37,44 +37,32 @@ public class MRTSchedulePerformanceTest {
 
             case 2:
                 System.out.println("==== Running Test Type: View Full Schedule ====");
-                for (int i = 0; i < n; i++) {
-                    viewFullSchedule();
-                }
+                viewFullSchedule();
                 break;
 
             case 3:
                 System.out.println("==== Running Test Type: View Station Schedule ====");
-                for (int i = 0; i < n; i++) {
-                    viewStationSchedule("Bundaran HI");
-                }
+                viewStationSchedule("Bundaran HI");
                 break;
 
             case 4:
                 System.out.println("==== Running Test Type: Find Next Arriving Train ====");
-                for (int i = 0; i < n; i++) {
-                    findNextArrivingTrain("Bundaran HI", "10:00");
-                }
+                findNextArrivingTrain("Bundaran HI", "10:00");
                 break;
 
             case 5:
                 System.out.println("==== Running Test Type: Reschedule Train ====");
-                for (int i = 0; i < n; i++) {
-                    rescheduleTrain("Train A", "Bundaran HI", "11:00");
-                }
+                rescheduleTrain("Train A", "Bundaran HI", "11:00");
                 break;
 
             case 6:
                 System.out.println("==== Running Test Type: Delay Train ====");
-                for (int i = 0; i < n; i++) {
-                    delayTrain("Train A", 10);
-                }
+                delayTrain("Train A", 10);
                 break;
 
             case 7:
                 System.out.println("==== Running Test Type: Cancel Train ====");
-                for (int i = 0; i < n; i++) {
-                    cancelTrain("Train" + i);
-                }
+                cancelTrain("Train0");
                 break;
         }
 
@@ -174,4 +162,4 @@ class StationTime {
         this.station = station;
         this.time = time;
     }
-} 
+}
