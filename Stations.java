@@ -1,12 +1,12 @@
-import java.util.TreeMap;
 import java.util.Scanner;
+import java.util.TreeMap;
 
 public class Stations {
-    private TreeMap<Integer, String> stationMap;
-    private TreeMap<String, Integer> forwardTravelTimeMap;
-    private TreeMap<String, Integer> backwardTravelTimeMap;
-    private Scanner sc = new Scanner(System.in);
-
+    private final TreeMap<Integer, String> stationMap;
+    private final TreeMap<String, Integer> forwardTravelTimeMap;
+    private final TreeMap<String, Integer> backwardTravelTimeMap;
+    
+    Scanner sc = new Scanner(System.in);
     private final int terminusHaltTime = 3; // Time in minutes where the train halts at the terminus station (should be customizable)
 
     // Constructor
