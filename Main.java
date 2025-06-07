@@ -2,13 +2,14 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
+        // Commented out user interaction code for complexity analysis
         int choice;
         int stationNumber = 0;
         Scanner sc = new Scanner(System.in);
         String trainID = null;
         int departureTime = 0;
-        int delayMinutes = 0;
-        boolean validInput = false;
+        int delayMinutes;
+        boolean validInput;
         Train train = new Train(trainID, departureTime);
         System.out.println("\nWelcome to DIMSUM 'Digital Interactive MRT Schedule Update Manager'");
         do {
@@ -35,12 +36,14 @@ public class Main {
 
             switch (choice) {
                 /* For the users! */
-                case 1: // View full schedule
+                case 1 -> {
+                    // View full schedule
                     System.out.println("Option 1 selected: View full schedule.");
                     System.out.println("\n-- Train Schedule --");
                     train.printSchedule(null);
-                    break;
-                case 2: // View each station's schedule
+                }
+                case 2 -> {
+                    // View each station's schedule
                     System.out.println("Option 2 selected: View each station's schedule.");
                     System.out.println("\n-- Station Schedule --");
                     train.getStationMap().forEach((key, value) -> {
@@ -56,14 +59,14 @@ public class Main {
 
                     train.printSchedule(selectedStation);
                     stationNumber = 0; // Reset stationNumber for next input                    
-                    break;
-                case 3: // Find next train departing
+                }
+                case 3 -> {
+                    // Find next departing train in the full schedule
                     System.out.println("Option 3 selected: Find next departing train.");
                     train.printNextTrain();
-                    break;
-
-                /* For the manager! */
-                case 4: // Add train schedule(s)
+                }
+                case 4 -> {
+                    // Add train schedule(s)
                     System.out.println("\nOption 4 selected: Add train schedule(s).\n");
                     System.out.print("Do you want to add schedules manually or automatically? (1 = Manual, 2 = Automatic): ");
                     int addMode = 1;
@@ -113,18 +116,18 @@ public class Main {
                                 }
                             }
                             switch (stationNumber) {
-                                case 1:
+                                case 1 -> {
                                     System.out.println("You selected station: Lebak Bulus (Start Terminus)");
                                     stationName = "Lebak Bulus";
-                                    break;
-                                case 2:
+                                }
+                                case 2 -> {
                                     System.out.println("You selected station: Bundaran HI (End Terminus)");
                                     stationName = "Bundaran HI";
-                                    break;
-                                case 3:
+                                }
+                                case 3 -> {
                                     System.out.println("You selected station: Blok M (Middle Parking)");
                                     stationName = "Blok M";
-                                    break;
+                                }
                             }
                             sc.nextLine(); // Consume the newline character
                             System.out.println("Please enter the following details to add a new train schedule:\n");
@@ -144,7 +147,7 @@ public class Main {
                         System.out.println("\nWhich station do you want to add train schedules to automatically?");
                         System.out.println("1. Lebak Bulus (Start Terminus)\n2. Bundaran HI (End Terminus)\n3. Blok M (Middle Parking)");
                         int autoStationNum = 0;
-                        String autoStationName = null;
+                        String autoStationName;
                         validInput = false;
                         while (!validInput) {
                             if (sc.hasNextInt()) {
@@ -159,17 +162,12 @@ public class Main {
                                 sc.next();
                             }
                         }
-                        switch (autoStationNum) {
-                            case 1:
-                                autoStationName = "Lebak Bulus";
-                                break;
-                            case 2:
-                                autoStationName = "Bundaran HI";
-                                break;
-                            case 3:
-                                autoStationName = "Blok M";
-                                break;
-                        }
+                        autoStationName = switch (autoStationNum) {
+                            case 1 -> "Lebak Bulus";
+                            case 2 -> "Bundaran HI";
+                            case 3 -> "Blok M";
+                            default -> null;
+                        };
                         sc.nextLine(); // consume newline
 
                         System.out.print("Enter the START TIME: ");
@@ -194,9 +192,9 @@ public class Main {
                         train.addSchedulesAutomatically(autoStationName, startTime, endTime, headway);
                         System.out.println("Automatic schedule addition completed.");
                     }
-                    break;
-                
-                case 5: // Reschedule train(s)
+                }
+                case 5 -> {
+                    // Reschedule train(s)
                     System.out.println("Option 5 selected: Reschedule train(s).");
                     System.out.print("How many schedules do you want to reschedule? ");
                     int rescheduleCount = 1;
@@ -223,9 +221,9 @@ public class Main {
                         String rescheduleStation = train.getStationMap().get(rescheduleStationNum);
                         train.rescheduleTrain(rescheduleTrainID, oldDepartureTime, newDepTime, rescheduleStation);
                     }
-                    break;
-                
-                case 6: // Delay train(s)
+                }
+                case 6 -> {
+                    // Delay train(s)
                     System.out.println("Option 6 selected: Delay train(s).");
                     System.out.print("How many schedules do you want to delay? ");
                     int delayCount = 1;
@@ -261,8 +259,9 @@ public class Main {
                         sc.nextLine(); // consume newline
                         train.delayTrain(delayTrainID, oldDelayTime, delayMinutes);
                     }
-                    break;
-                case 7: // Cancel train(s)
+                }
+                case 7 -> {
+                    // Cancel train(s)
                     System.out.println("Option 7 selected: Cancel train(s).");
                     System.out.print("How many schedules do you want to cancel? ");
                     int cancelCount = 1;
@@ -285,8 +284,9 @@ public class Main {
                         int oldCancelTime = train.inputDepTime(sc);
                         train.cancelTrain(cancelTrainID, oldCancelTime);
                     }
-                    break;
-                case 8: // Simulate train running (this creates the whole schedule for the day)
+                }
+                case 8 -> {
+                    // Simulate trains running
                     System.out.println("Option 8 selected: Simulate trains running.");
                     System.out.print("Enter the closing time (format: HHMM): ");
                     int closingTime = 0;
@@ -304,14 +304,14 @@ public class Main {
                         }
                     }
                     train.simulateTrainRunning(closingTime);
-                    break;
-                case 9: // Exit
+                }
+                case 9 -> {
                     System.out.println("Exiting the Train Management System. Goodbye!");
-                    break;
-                default:
+                }
+                default -> {
                     System.out.println("Invalid choice. Please select a Number between 1 and 9.");
+                }
             }
         } while (choice != 9); // while the user does not select 8 (exit) do the switch statements
-        sc.close(); 
     }
 }
