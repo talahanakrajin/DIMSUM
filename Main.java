@@ -2,7 +2,6 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        // Commented out user interaction code for complexity analysis
         int choice;
         int stationNumber = 0;
         Scanner sc = new Scanner(System.in);
