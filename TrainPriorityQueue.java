@@ -45,7 +45,7 @@ class TrainPriorityQueue {
     }
 
     public static void main(String[] args) {
-        int n = 10; // Number of schedules to add
+        int n = 10000; // Number of schedules to add
         TrainPriorityQueue trainQueue = new TrainPriorityQueue();
 
         int totalCases = 7;
