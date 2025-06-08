@@ -56,6 +56,5 @@ public class Station {
 
     public PriorityQueue<Train> displayTrains() {
         return new PriorityQueue<>(trainQueue); // Return a copy of the train queue
-        
     }
 }

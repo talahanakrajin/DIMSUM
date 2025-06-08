@@ -15,7 +15,7 @@ public class PerformanceMetrics {
         double memoryUsed = (memoryAfter - memoryBefore) / 1024.0;
 
         System.out.println("Time taken: " + timeTaken + " ms");
-        System.out.println("Memory used: " + memoryUsed + " KB");
+        System.out.println("Memory used: " + memoryUsed + " KB\n");
     }
 
 }

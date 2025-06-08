@@ -11,9 +11,8 @@ class TrainPriorityQueue {
         for (Station st : schedule) {
             if (st.name.equals(station.name)) {
                 st.displayTrains(); // Display trains in the station's queue
-                
+                return;
             }
-            return;
         }
         System.out.println("Station not found in the schedule.");
     }
@@ -49,83 +48,81 @@ class TrainPriorityQueue {
         int n = 10; // Number of schedules to add
         TrainPriorityQueue trainQueue = new TrainPriorityQueue();
 
-        //nt testType = 1; // Start with test type 1
-        
         int totalCases = 7;
-        for (int testType = 1; testType <= totalCases; testType++) {
-        if (testType == 1) {
-          // Always add schedules first for a fresh queue
-        trainQueue = new TrainPriorityQueue();
-          }
-        int currentTestType = testType;
-        TrainPriorityQueue currentQueue = trainQueue;
-        Runnable testTask = () -> {
-            switch (currentTestType) {
-                case 1:
-                    // Add schedules
-                    for (int i = 0; i < n; i++) {
-                        Station station = new Station("Station " + i);
-                        for (int j = 0; j < 5; j++) {
-                            Train train = new Train(j, (int) (Math.random() * 100) + 1,
-                                    (int) (Math.random() * 2400));
-                            station.addTrain(train);
-                        }
-                        currentQueue.addStation(station);
-                    }
-                    break;
-                case 2:
-                    // Print all schedules
-                    currentQueue.displayTrains();
-                    break;
-                case 3:
-                    // Print schedules for a specific station
+        int repeat = 5; // Number of times to repeat all tests
+        for (int r = 1; r <= repeat; r++) {
+            System.out.println("=== Test Run #" + r + " ===");
+            for (int testType = 1; testType <= totalCases; testType++) {
+                System.out.println("Running test case: " + testType);
+                if (testType == 1) {
+                    // Always add schedules first for a fresh queue
+                    trainQueue = new TrainPriorityQueue();
+                }
+                int currentTestType = testType;
+                TrainPriorityQueue currentQueue = trainQueue;
+
+                // The start of the testing function
+                Runnable testTask = () -> {
+                    Station station = null;
+                    Train train = null;
                     if (!currentQueue.schedule.isEmpty()) {
-                        currentQueue.viewSchedule(currentQueue.schedule.get(0));
-                    }
-                    break;
-                case 4:
-                    // Find the next train in the schedule
-                    if (!currentQueue.schedule.isEmpty()) {
-                        Station station = currentQueue.schedule.get(0);
-                        station.getNextTrain();
- 
-                    }
-                    break;
-                case 5:
-                    // Reschedule a train by ID
-                    if (!currentQueue.schedule.isEmpty()) {
-                        Station station = currentQueue.schedule.get(0);
-                        Train train = station.trainQueue.peek();
-                        if (train != null) {
-                            station.rescheduleTrain(train, train.priority + 10);
+                        station = currentQueue.schedule.get(0);
+                        if (!station.trainQueue.isEmpty()) {
+                            train = station.trainQueue.peek();
                         }
                     }
-                    break;
-                case 6:
-                    // Delay a train by ID
-                    if (!currentQueue.schedule.isEmpty()) {
-                        Station station = currentQueue.schedule.get(0);
-                        Train train = station.trainQueue.peek();
-                        if (train != null) {
-                            station.delayTrain(train, 10);
-                        }
+                    switch (currentTestType) {
+                        case 1:
+                            // Add schedules
+                            for (int i = 0; i < n; i++) {
+                                Station station1 = new Station("Station " + i);
+                                for (int j = 0; j < 5; j++) {
+                                    Train train1 = new Train(j, (int) (Math.random() * 100) + 1,
+                                            (int) (Math.random() * 2400));
+                                    station1.addTrain(train1);
+                                }
+                                currentQueue.addStation(station1);
+                            }
+                            break;
+                        case 2:
+                            // Print all schedules
+                            currentQueue.displayTrains();
+                            break;
+                        case 3:
+                            // Print schedules for a specific station
+                            if (!currentQueue.schedule.isEmpty()) {
+                                currentQueue.viewSchedule(currentQueue.schedule.get(0));
+                            }
+                            break;
+                        case 4:
+                            // Find the next train in the schedule
+                            if (station != null) {
+                                currentQueue.getNextTrain(station);
+                            }
+                            break;
+                        case 5:
+                            // Reschedule a train by ID
+                            if (station != null && train != null) {
+                                station.rescheduleTrain(train, train.priority + 10);
+                            }
+                            break;
+                        case 6:
+                            // Delay a train by ID
+                            if (station != null && train != null) {
+                                station.delayTrain(train, 10);
+                            }
+                            break;
+                        case 7:
+                            // Cancel a train by ID
+                            if (station != null && train != null) {
+                                station.cancelTrain(train);
+                            }
+                            break;
                     }
-                    break;
-                
-                case 7:
-                    // Cancel a train by ID
-                    if (!currentQueue.schedule.isEmpty()) {
-                        Station station = currentQueue.schedule.get(0);
-                        Train train = station.trainQueue.peek();
-                        if (train != null) {
-                            station.cancelTrain(train);
-                        }
-                    }
-                    break;
-               
+                };
+                PerformanceMetrics.measureRuntime(testTask);
             }
-        };
-        PerformanceMetrics.measureRuntime(testTask);
+        }
     }
 }
-}
+
