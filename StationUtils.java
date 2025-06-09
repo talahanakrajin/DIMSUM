@@ -1,8 +1,8 @@
 import java.util.Scanner;
 import java.util.TreeMap;
 
-public final class StationInputUtils {
-    private StationInputUtils() {} // Prevent instantiation
+public final class StationUtils {
+    private StationUtils() {} // Prevent instantiation
 
     // Make these static so they can be used from anywhere
     public static int checkStationNumber(Scanner sc, TreeMap<Integer, String> stationMap) {
@@ -27,8 +27,9 @@ public final class StationInputUtils {
 
     // Prompts user to select a station number (0 for "keep original station" is allowed)
     public static int stationSelection(Scanner sc, TreeMap<Integer, String> stationMap) {
+        System.out.println("\nList of stations:");
         stationMap.forEach((key, value) -> {
-            System.out.println(key + ". " + value + "\n");
+            System.out.println(key + ". " + value);
         });
         System.out.print("Enter the station number to reschedule (Enter 0 to keep the original station): ");
 

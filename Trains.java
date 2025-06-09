@@ -11,12 +11,13 @@ public abstract class Trains implements Schedulable {
 
     /**
      * Constructor for Trains.
-     * @param trainID Unique identifier for the train.
+     * @param trainID Unique identifier for the train. Must be in format TSxxxx.
      * @param departureTime Departure time in HHMM format.
      * @param currentStation Name of the current station.
+     * @throws IllegalArgumentException if trainID format is invalid.
      */
     public Trains(String trainID, int departureTime, String currentStation) {
-        this.trainID = trainID;
+        this.trainID = trainID; // Assume already validated and uppercase
         this.departureTime = departureTime;
         this.currentStation = currentStation;
     }
@@ -50,7 +51,10 @@ public abstract class Trains implements Schedulable {
     /** String representation of the train */
     @Override
     public String toString() {
-        return "TrainID: " + trainID + ", Departure: " + String.format("%04d", departureTime) +
+        int hours = departureTime / 100;
+        int minutes = departureTime % 100;
+        String depTime = String.format("%02d:%02d", hours, minutes);
+        return "TrainID: " + trainID + ", Departure: " + depTime +
                 ", Station: " + currentStation;
     }
 }

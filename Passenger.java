@@ -11,7 +11,7 @@ public class Passenger extends User {
     }
 
     @Override
-    public void accessSystem(SchedulingSystem scheduleSystem, Scanner sc) {
+    public void accessSystem(SchedulingSystem passenger, Scanner sc) {
         Stations staticStations = new Stations(); // For access to stationMap
         boolean running = true;
         while (running) {
@@ -26,23 +26,23 @@ public class Passenger extends User {
             String choice = sc.nextLine();
             switch (choice) {
                 case "1":
-                    scheduleSystem.printAllSchedules();
+                    passenger.printAllSchedules();
                     break;
                 case "2":
-                    int stationNum = Stations.checkStationNumber(sc, staticStations.getStationMap());
+                    int stationNum = StationUtils.stationSelection(sc, staticStations.getStationMap());
                     String station = staticStations.getStationMap().get(stationNum);
-                    scheduleSystem.printStationSchedule(station);
+                    passenger.printStationSchedule(station);
                     break;
                 case "3":
-                    System.out.println(scheduleSystem.getNextTrain());
+                    System.out.println(passenger.getNextTrain());
                     break;
                 case "4":
-                    int stNum = Stations.checkStationNumber(sc, staticStations.getStationMap());
+                    int stNum = StationUtils.stationSelection(sc, staticStations.getStationMap());
                     String st = staticStations.getStationMap().get(stNum);
-                    System.out.println(scheduleSystem.getNextTrain(st));
+                    System.out.println(passenger.getNextTrain(st));
                     break;
                 case "5":
-                    scheduleSystem.printDelayedTrainsByPriority();
+                    passenger.printDelayedTrainsByPriority();
                     break;
                 case "0":
                     running = false;
