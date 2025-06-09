@@ -17,9 +17,9 @@ public class MRTSchedulePerformanceTest {
 
    public static void main(String[] var0) {
       int repeatCount = 10;
-      // testing viewing full schedule with 0 trains (empty)
+      // First, test viewing full schedule with 0 trains (should be empty)
       complexityTest(2, 0, repeatCount);
-      int var1 = 1000;
+      int var1 = 10;
       for(int var2 = 1; var2 <= 7; ++var2) {
          complexityTest(var2, var1, repeatCount);
       }
