@@ -1,14 +1,13 @@
 public class HybridTrain {
     private String trainID;
     private int departureTime;
-    private String station;
-    private int priority;
+    private String CurrentStation;
+    private int delay = 0;
 
-    public HybridTrain(String trainID, int departureTime, String station, int priority) {
+    public HybridTrain(String trainID, int departureTime, String station, int unusedPriority) {
         this.trainID = trainID;
         this.departureTime = departureTime;
-        this.station = station;
-        this.priority = priority;
+        this.CurrentStation = station;
     }
 
     public String getTrainID() {
@@ -28,24 +27,24 @@ public class HybridTrain {
     }
 
     public String getStation() {
-        return station;
+        return CurrentStation;
     }
 
     public void setStation(String station) {
-        this.station = station;
+        this.CurrentStation = station;
     }
 
-    public int getPriority() {
-        return priority;
+    public int getDelay() {
+        return delay;
     }
 
-    public void setPriority(int priority) {
-        this.priority = priority;
+    public void setDelay(int delay) {
+        this.delay = delay;
     }
 
     @Override
     public String toString() {
         return "TrainID: " + trainID + ", Departure: " + String.format("%04d", departureTime) +
-                ", Station: " + station + ", Priority: " + priority;
+                ", Station: " + CurrentStation;
     }
 }
