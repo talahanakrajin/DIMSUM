@@ -1,3 +1,4 @@
+package PriorityQueue;
 import java.util.*;
 
 class TrainPriorityQueue {
