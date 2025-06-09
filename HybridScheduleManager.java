@@ -9,7 +9,7 @@ public class HybridScheduleManager {
     // Global schedule sorted by departure time, using TreeMap for O(log n) access
     private final TreeMap<Integer, HybridTrain> globalSchedule = new TreeMap<>();
     // HybridTrain with the earliest departure time, for O(1) access to next train
-    private HybridTrain minTrain = null;
+    private HybridTrain earliestTrain = null;
 
     // Only keep delayQueue for delayed train priority (not for reschedule/cancel)
     // Highest delay = highest priority (front of the queue), then by earliest departure time
@@ -36,10 +36,10 @@ public class HybridScheduleManager {
 
         globalSchedule.put(train.getDepartureTime(), train);
         trainById.put(train.getTrainID(), train);
-        stationSchedules.computeIfAbsent(train.getStation(), k -> new TreeMap<>())
-            .put(train.getDepartureTime(), train);
-        if (minTrain == null || train.getDepartureTime() < minTrain.getDepartureTime()) {
-            minTrain = train;
+        stationSchedules.computeIfAbsent(train.getStation(), k -> new TreeMap<>()).put(train.getDepartureTime(), train);
+        
+        if (earliestTrain == null || train.getDepartureTime() < earliestTrain.getDepartureTime()) {
+            earliestTrain = train;
         }
     }
 
@@ -71,6 +71,16 @@ public class HybridScheduleManager {
                 System.out.println(train + " | Delayed: " + train.getDelay() + " min");
             }
         }
+    }
+
+    // Find next train globally (by earliest in scheduleByTime)
+    public HybridTrain getNextTrain() {
+        return earliestTrain;
+    }
+    // Find next train for a station
+    public HybridTrain getNextTrain(String stationName) {
+        TreeMap<Integer, HybridTrain> stationMap = stationSchedules.get(stationName);
+        return (stationMap == null || stationMap.isEmpty()) ? null : stationMap.firstEntry().getValue();
     }
 
     // Delay a train and update the delay queue (still O(n) for remove, O(log n) for add)
@@ -105,16 +115,6 @@ public class HybridScheduleManager {
         }
     }
 
-    // Find next train globally (by earliest in scheduleByTime)
-    public HybridTrain getNextTrain() {
-        return minTrain;
-    }
-    // Find next train for a station
-    public HybridTrain getNextTrain(String stationName) {
-        TreeMap<Integer, HybridTrain> stationMap = stationSchedules.get(stationName);
-        return (stationMap == null || stationMap.isEmpty()) ? null : stationMap.firstEntry().getValue();
-    }
-
     // Reschedule a train (now O(log n), does NOT touch delayQueue)
     public void rescheduleTrain(String trainID, int newDepartureTime, String newStation) {
         HybridTrain train = trainById.get(trainID);
@@ -126,7 +126,7 @@ public class HybridScheduleManager {
         train.setDepartureTime(newDepartureTime);
         train.setStation(newStation);
         addTrain(train);
-        minTrain = globalSchedule.isEmpty() ? null : globalSchedule.firstEntry().getValue();
+        earliestTrain = globalSchedule.isEmpty() ? null : globalSchedule.firstEntry().getValue();
     }
 
     // Cancel a train (now O(log n), does NOT touch delayQueue)
@@ -137,6 +137,6 @@ public class HybridScheduleManager {
         TreeMap<Integer, HybridTrain> stationMap = stationSchedules.get(train.getStation());
         if (stationMap != null) stationMap.remove(train.getDepartureTime());
         // Do NOT remove from delayQueue here
-        minTrain = globalSchedule.isEmpty() ? null : globalSchedule.firstEntry().getValue();
+        earliestTrain = globalSchedule.isEmpty() ? null : globalSchedule.firstEntry().getValue();
     }
 }
