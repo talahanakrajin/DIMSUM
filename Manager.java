@@ -30,10 +30,8 @@ public class Manager extends User {
             String choice = sc.nextLine();
             switch (choice) {
                 case "1":
-                    System.out.print("Enter Train ID: ");
-                    String id = sc.nextLine();
-                    System.out.print("Enter Departure Time (HHMM): ");
-                    int dep = Integer.parseInt(sc.nextLine());
+                    String id = TrainUtils.promptValidTrainID(sc);
+                    int dep = TimeUtils.promptValidDepartureTime(sc);
                     System.out.print("Enter Station: ");
                     String station = sc.nextLine();
                     manager.addTrain(new MRT(id, dep, station));
@@ -41,10 +39,9 @@ public class Manager extends User {
                     break;
                 case "2":
                     System.out.print("Enter Train ID: ");
-                    String trainID = sc.nextLine();
-                    System.out.print("Enter New Departure Time (HHMM): ");
-                    int newDep = Integer.parseInt(sc.nextLine());
-                    int newStationNum = Stations.stationSelection(sc, staticStations.getStationMap());
+                    String trainID = TrainUtils.promptValidTrainID(sc);
+                    int newDep = TimeUtils.promptValidDepartureTime(sc);
+                    int newStationNum = StationUtils.stationSelection(sc, staticStations.getStationMap());
                     String newStation;
                     if (newStationNum == 0) {
                         MRT train = (MRT) manager.getTrainById(trainID);
@@ -61,23 +58,22 @@ public class Manager extends User {
                     break;
                 case "3":
                     System.out.print("Enter Train ID: ");
-                    String did = sc.nextLine();
-                    System.out.print("Enter Delay Minutes: ");
-                    int delay = Integer.parseInt(sc.nextLine());
-                    manager.delayTrain(did, delay);
+                    String delayID = TrainUtils.promptValidTrainID(sc);
+                    int delay = TimeUtils.promptValidDelayMinutes(sc);
+                    manager.delayTrain(delayID, delay);
                     System.out.println("Train delayed.");
                     break;
                 case "4":
                     System.out.print("Enter Train ID: ");
-                    String cid = sc.nextLine();
-                    manager.cancelTrain(cid);
+                    String cancelID = sc.nextLine();
+                    manager.cancelTrain(cancelID);
                     System.out.println("Train cancelled.");
                     break;
                 case "5":
                     manager.printAllSchedules();
                     break;
                 case "6":
-                    int stationNum = Stations.checkStationNumber(sc, staticStations.getStationMap());
+                    int stationNum = StationUtils.checkStationNumber(sc, staticStations.getStationMap());
                     String st = staticStations.getStationMap().get(stationNum);
                     manager.printStationSchedule(st);
                     break;

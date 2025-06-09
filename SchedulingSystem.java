@@ -23,6 +23,11 @@ public class SchedulingSystem {
             return cmp;
         }
     );
+    private final String managerPassword = "eatdimsumeveryday";
+
+    public boolean checkManagerPassword(String password) {
+        return managerPassword.equals(password);
+    }
 
     /**
      * Get a train by its ID.
@@ -38,20 +43,21 @@ public class SchedulingSystem {
      * @param schedule The train to add.
      * @throws IllegalArgumentException if the departure time is invalid.
      */
-    public void addTrain(Schedulable schedule) { // Accepts any Schedulable
+    public void addTrain(Schedulable schedule) {
+        // Always validate the departure time from the schedule object before adding
         int dep = schedule.getDepartureTime();
-        TimeUtils.validateHHMM(dep); // Exception handling
-        globalSchedule.put(schedule.getDepartureTime(), schedule);
+        TimeUtils.formatDepartureTime(dep); // Exception handling and validation
+        globalSchedule.put(dep, schedule);
         trainById.put(((Trains) schedule).getTrainID(), schedule);
         stations.computeIfAbsent(((Trains) schedule).getCurrentStation(), k -> new CurrentStation(k)).addTrain((MRT) schedule);
 
-        if (earliestTrain == null || schedule.getDepartureTime() < earliestTrain.getDepartureTime()) {
+        if (earliestTrain == null || dep < earliestTrain.getDepartureTime()) {
             earliestTrain = schedule;
         }
     }
 
     /** Print all train schedules. */
-    public void printAllschedules() {
+    public void printAllSchedules() {
         for (var entry : globalSchedule.entrySet()) {
             Schedulable schedule = entry.getValue();
             Trains train = (Trains) schedule;
@@ -64,7 +70,7 @@ public class SchedulingSystem {
     }
 
     /** Print the schedule for a specific station. */
-    public void printStationschedule(String stationName) {
+    public void printStationSchedule(String stationName) {
         CurrentStation station = stations.get(stationName);
         if (station == null || station.getSchedule().isEmpty()) {
             System.out.println("No trains for station " + stationName);
