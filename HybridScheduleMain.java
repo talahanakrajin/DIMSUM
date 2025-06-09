@@ -55,6 +55,11 @@ public class HybridScheduleMain {
         System.out.println("\n=== Schedules for Lebak Bulus ===");
         manager.printStationSchedule("Lebak Bulus");
 
+        System.out.println("\n=== Next Train (Global) ===");
+        System.out.println(manager.getNextTrain());
+
+        System.out.println("\n=== Next Train at Blok M ===");
+        System.out.println(manager.getNextTrain("Blok M"));
         sc.close();
     }
 }
