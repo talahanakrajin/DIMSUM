@@ -8,7 +8,6 @@ public class MRTScheduleManager {
     private static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
-        initializeSchedule();
         System.out.println("Select role: 1. Passenger  2. Manager");
         int role = scanner.nextInt();
         scanner.nextLine();
@@ -258,51 +257,6 @@ public class MRTScheduleManager {
         } else {
             System.out.println("Invalid choice.");
         }
-    }
-
-    private static void initializeSchedule() {
-        mrtSchedule.put("Train A", new ArrayList<>(Arrays.asList(
-            new StationTime("Bundaran HI", "5:00"),
-            new StationTime("Dukuh Atas BNI", "5:05"),
-            new StationTime("Setiabudi Astra", "5:10"),
-            new StationTime("Bendungan Hilir", "5:15"),
-            new StationTime("Istora", "5:20"),
-            new StationTime("Senayan", "5:25"),
-            new StationTime("ASEAN", "5:30"),
-            new StationTime("Blok M", "5:35"),
-            new StationTime("Blok A", "5:40"),
-            new StationTime("Haji Nawi", "5:45"),
-            new StationTime("Cipete Raya", "5:50"),
-            new StationTime("Fatmawati", "5:55")
-        )));
-        mrtSchedule.put("Train B", new ArrayList<>(Arrays.asList(
-            new StationTime("Bundaran HI", "13:00"),
-            new StationTime("Dukuh Atas BNI", "13:05"),
-            new StationTime("Setiabudi Astra", "13:10"),
-            new StationTime("Bendungan Hilir", "13:15"),
-            new StationTime("Istora", "13:20"),
-            new StationTime("Senayan", "13:25"),
-            new StationTime("ASEAN", "13:30"),
-            new StationTime("Blok M", "13:35"),
-            new StationTime("Blok A", "13:40"),
-            new StationTime("Haji Nawi", "13:45"),
-            new StationTime("Cipete Raya", "13:50"),
-            new StationTime("Fatmawati", "13:55")
-        )));
-        mrtSchedule.put("Train C", new ArrayList<>(Arrays.asList(
-            new StationTime("Bundaran HI", "17:00"),
-            new StationTime("Dukuh Atas BNI", "17:05"),
-            new StationTime("Setiabudi Astra", "17:10"),
-            new StationTime("Bendungan Hilir", "17:15"),
-            new StationTime("Istora", "17:20"),
-            new StationTime("Senayan", "17:25"),
-            new StationTime("ASEAN", "17:30"),
-            new StationTime("Blok M", "17:35"),
-            new StationTime("Blok A", "17:40"),
-            new StationTime("Haji Nawi", "17:45"),
-            new StationTime("Cipete Raya", "17:50"),
-            new StationTime("Fatmawati", "17:55")
-        )));
     }
 }
 
