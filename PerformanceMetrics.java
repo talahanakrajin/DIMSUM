@@ -1,21 +1,21 @@
 public class PerformanceMetrics {
     public static void measureRuntime(Runnable function) {
         System.gc();
-        long startTime = System.nanoTime();
+        double startTime = System.nanoTime();
 
         Runtime runtime = Runtime.getRuntime();
-        long memoryBefore = runtime.totalMemory() - runtime.freeMemory();
+        double memoryBefore = runtime.totalMemory() - runtime.freeMemory();
 
         function.run();
 
-        long memoryAfter = runtime.totalMemory() - runtime.freeMemory();
-        long endTime = System.nanoTime();
+        double memoryAfter = runtime.totalMemory() - runtime.freeMemory();
+        double endTime = System.nanoTime();
 
-        long timeTaken = (endTime - startTime);
-        long memoryUsed = Math.max(0, memoryAfter - memoryBefore);
+        double timeTaken = (endTime - startTime) / 1_000_000.0;
+        double memoryUsed = (memoryAfter - memoryBefore) / 1024.0;
 
-        System.out.println("Time taken: " + timeTaken + " nanoseconds");
-        System.out.println("Memory used: " + memoryUsed + " bytes");
+        System.out.println("Time taken: " + timeTaken + " ms");
+        System.out.println("Memory used: " + memoryUsed + " KB\n");
     }
 
 }
