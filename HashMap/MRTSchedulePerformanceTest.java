@@ -5,7 +5,6 @@ import java.util.*;
 
 public class MRTSchedulePerformanceTest {
     private static Map<String, List<StationTime>> mrtSchedule = new HashMap<>();
-    private static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
         int n = 100; 
@@ -138,6 +137,7 @@ public class MRTSchedulePerformanceTest {
         mrtSchedule.remove(trainName);
     }
 
+    /* 
     private static void initializeSchedule() {
         mrtSchedule.put("Train A", new ArrayList<>(Arrays.asList(
             new StationTime("Bundaran HI", "5:00"),
@@ -154,6 +154,7 @@ public class MRTSchedulePerformanceTest {
             new StationTime("Fatmawati", "5:55")
         )));
     }
+    */
 }
 
 class StationTime {
