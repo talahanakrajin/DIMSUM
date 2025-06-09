@@ -1,3 +1,4 @@
+package PriorityQueue;
 public class Train {
     int id;
     int priority;
