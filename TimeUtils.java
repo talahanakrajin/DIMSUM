@@ -67,13 +67,13 @@ public final class TimeUtils {
 
     /**
      * Adds minutes to a time in HHMM format, with wrap-around at 24 hours.
-     * @param hhmm The original time.
+     * @param depTime The original time.
      * @param minutesToAdd Minutes to add.
      * @return The new time in HHMM format.
      */
-    public static int addMinutesHHMM(int hhmm, int minutesToAdd) {
-        int hours = hhmm / 100;
-        int minutes = hhmm % 100;
+    public static int addMinutesToDepTime(int depTime, int minutesToAdd) {
+        int hours = depTime / 100;
+        int minutes = depTime % 100;
         minutes += minutesToAdd;
         hours += minutes / 60;
         minutes = minutes % 60;
