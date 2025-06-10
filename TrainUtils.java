@@ -31,4 +31,25 @@ public final class TrainUtils {
             }
         }
     }
+
+    /**
+     * Utility for adding a single train to the system.
+     */
+    public static void addTrain(SchedulingSystem system, String id, int depTime, String stationName) {
+        system.addTrain(new MRT(id, depTime, stationName));
+    }
+
+    /**
+     * Utility for adding multiple trains automatically to the system.
+     */
+    public static void autoAddTrain(SchedulingSystem system, String stationName, int startTime, int endTime, int headway) {
+        int trainNumber = 1;
+        int currentTime = startTime;
+        while (currentTime <= endTime) {
+            String autoTrainID = String.format("TS%04d", trainNumber);
+            system.addTrain(new MRT(autoTrainID, currentTime, stationName));
+            currentTime = TimeUtils.addMinutesToDepTime(currentTime, headway);
+            trainNumber++;
+        }
+    }
 }
