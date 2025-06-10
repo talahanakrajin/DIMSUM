@@ -25,14 +25,20 @@ public final class StationUtils {
         return stationNumber;
     }
 
-    // Prompts user to select a station number (0 for "keep original station" is allowed)
-    public static int stationSelection(Scanner sc, TreeMap<Integer, String> stationMap) {
+    /**
+     * Prints the list of stations with their numbers.
+     */
+    public static void printStationList(TreeMap<Integer, String> stationMap) {
         System.out.println("\nList of stations:");
         stationMap.forEach((key, value) -> {
             System.out.println(key + ". " + value);
         });
-        System.out.print("Enter the station number to reschedule (Enter 0 to keep the original station): ");
+    }
 
+    /**
+     * Prompts user to select a station and returns the station number.
+     */
+    public static int stationSelection(Scanner sc, TreeMap<Integer, String> stationMap) {
         int stationNum = -1;
         boolean validInput = false;
         while (!validInput) {
@@ -50,5 +56,36 @@ public final class StationUtils {
         }
         sc.nextLine(); // Consume the newline character
         return stationNum;
+    }
+
+    /**
+     * Gets the station name from the station number.
+     */
+    public static String getStationName(int stationNum, TreeMap<Integer, String> stationMap) {
+        return stationMap.get(stationNum);
+    }
+
+    /**
+     * Prints the schedule header for a specific station.
+     */
+    public static void printStationScheduleHeader(String stationName) {
+        System.out.println("\nSchedule for " + stationName + ":");
+    }
+
+    /**
+     * Determines if a train at a given station should be northbound.
+     * @param stationName The name of the station
+     * @return true if the train should be northbound, false if southbound
+     */
+    public static boolean checkInitialDirection(String stationName) {
+        Stations stations = new Stations();
+        int stationNum = -1;
+        for (var entry : stations.getStationMap().entrySet()) {
+            if (entry.getValue().equals(stationName)) {
+                stationNum = entry.getKey();
+                break;
+            }
+        }
+        return stationNum < 13; // If not at Bundaran HI (13), train is northbound
     }
 }

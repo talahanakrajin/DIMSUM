@@ -3,6 +3,7 @@
  * Demonstrates use of Java Collections, exception handling, custom classes, and polymorphism.
  */
 public class SchedulingSystem {
+    private final Stations stationsData = new Stations();
     private final String managerPassword = "eatdimsumeveryday";
 
     public boolean checkManagerPassword(String password) {
@@ -11,26 +12,25 @@ public class SchedulingSystem {
 
     // Delegates to MRT for data retrieval and processing
     public Schedulable getTrainById(String id) {
-        // Delegates to MRT for data retrieval
-        return MRT.getTrainById(id);
+        return MRTManager.getTrainById(id);
     }
 
     /* ALL METHODS BELOW ARE PASS THROUGH METHODS */
     // Adds a train schedule to the system
     public void addTrain(Schedulable schedule) {
-        MRT.addTrain(schedule);
+        MRTManager.addTrain(schedule);
     }
     // Prints all train schedules
     public void printAllSchedules() {
-        MRT.printAllSchedules();
+        MRTManager.printAllSchedules();
     }
     // Prints the train schedule for a specific station
-    public void printStationSchedule(String stationName) {
-        MRT.printStationSchedule(stationName);
+    public void printStationSchedule(java.util.Scanner sc, java.util.TreeMap<Integer, String> stationMap) {
+        MRTManager.printStationSchedule(sc, stationMap);
     }
     // Gets the next departing train in the system
     public void getNextTrain() {
-        Schedulable nextTrain = MRT.getNextTrain();
+        Schedulable nextTrain = MRTManager.getNextTrain();
         if (nextTrain != null) {
             System.out.println("Next train in the system: " + nextTrain);
         } else {
@@ -39,34 +39,40 @@ public class SchedulingSystem {
     }
     // Gets the next departing train at a specific station
     public void getNextTrain(String stationName) {
-        Schedulable nextTrain = MRT.getNextTrain(stationName);
+        Schedulable nextTrain = MRTManager.getNextTrain(stationName);
         if (nextTrain != null) {
             System.out.println("Next train at " + stationName + ": " + nextTrain);
         } else {
             System.out.println("No trains found for station: " + stationName);
         }
     }
+    // Gets the next train at a station with user input
+    public void getNextTrainAtStation(java.util.Scanner sc, java.util.TreeMap<Integer, String> stationMap) {
+        MRTManager.getNextTrainAtStation(sc, stationMap);
+    }
     // Delays a train 
-    public void delayTrain(String trainID, int delayMinutes) {
-        MRT.delayTrain(trainID, delayMinutes);
+    public boolean delayTrain(String trainID, int departureTime, int delayMinutes) {
+        return MRTManager.delayTrain(trainID, departureTime, delayMinutes);
     }
     // Prints only delayed trains sorted by priority
     public void printDelayedTrainsByPriority() {
-        MRT.printDelayedTrainsByPriority();
+        MRTManager.printDelayedTrainsByPriority();
     }
     // Reschedules a train to a new departure time and station (optional)
-    public void rescheduleTrain(String trainID, int newDepartureTime, String newStation) {
-        MRT.rescheduleTrain(trainID, newDepartureTime, newStation);
+    public boolean rescheduleTrain(String trainID, int oldDepartureTime, int newDepartureTime, String newStation) {
+        return MRTManager.rescheduleTrain(trainID, oldDepartureTime, newDepartureTime, newStation);
     }
     // Cancel a train schedule
-    public void cancelTrain(String trainID) {
-        MRT.cancelTrain(trainID);
+    public boolean cancelTrain(String trainID, int departureTime) {
+        return MRTManager.cancelTrain(trainID, departureTime);
+    }
+    public void simulateTrainsRunning(int closingTime) {
+        MRTManager.simulateTrainsRunning(closingTime);
     }
 
     /* PASSENGER & MANAGER MENU LOGIC */
     // Handles the passenger menu and all user input/validation for passenger actions
     public void passengerMenu(java.util.Scanner sc) {
-        Stations stationsData = new Stations();
         boolean running = true;
         while (running) {
             System.out.println("\nPassenger Menu:");
@@ -77,22 +83,19 @@ public class SchedulingSystem {
             System.out.println("0. Exit");
             System.out.print("Choose an option: ");
             String choice = sc.nextLine();
+
             switch (choice) {
                 case "1":
-                    MRT.printAllSchedules();
+                    printAllSchedules();
                     break;
                 case "2":
-                    int stationNum = StationUtils.stationSelection(sc, stationsData.getStationMap());
-                    String station = stationsData.getStationMap().get(stationNum);
-                    MRT.printStationSchedule(station);
+                    printStationSchedule(sc, stationsData.getStationMap());
                     break;
                 case "3":
-                    int stNum = StationUtils.stationSelection(sc, stationsData.getStationMap());
-                    String st = stationsData.getStationMap().get(stNum);
-                    getNextTrain(st);
+                    getNextTrainAtStation(sc, stationsData.getStationMap());
                     break;
                 case "4":
-                    MRT.printDelayedTrainsByPriority();
+                    printDelayedTrainsByPriority();
                     break;
                 case "0":
                     running = false;
@@ -105,7 +108,6 @@ public class SchedulingSystem {
 
     // Handles the manager menu and all user input/validation for manager actions
     public void managerMenu(java.util.Scanner sc) {
-        Stations staticStations = new Stations();
         boolean running = true;
         while (running) {
             System.out.println("\nManager Menu:");
@@ -115,18 +117,19 @@ public class SchedulingSystem {
             System.out.println("4. Cancel train");
             System.out.println("5. View all schedules");
             System.out.println("6. View schedules for a station");
-            System.out.println("7. Find next departing train (global)");
-            System.out.println("8. Find next departing train at a station");
-            System.out.println("9. View delayed trains by priority");
+            System.out.println("7. Find next departing train");
+            System.out.println("8. View delayed trains by priority");
+            System.out.println("9. Simulate trains running");
             System.out.println("0. Exit");
             System.out.print("Choose an option: ");
             String choice = sc.nextLine();
+
             switch (choice) {
                 case "1":
                     addTrainMenu(sc);
                     break;
                 case "2":
-                    rescheduleTrainMenu(sc, staticStations);
+                    rescheduleTrainMenu(sc, stationsData);
                     break;
                 case "3":
                     delayTrainMenu(sc);
@@ -138,15 +141,16 @@ public class SchedulingSystem {
                     printAllSchedules();
                     break;
                 case "6":
-                    int stationNum = StationUtils.checkStationNumber(sc, staticStations.getStationMap());
-                    String st = staticStations.getStationMap().get(stationNum);
-                    printStationSchedule(st);
+                    printStationSchedule(sc, stationsData.getStationMap());
                     break;
                 case "7":
                     getNextTrainMenu(sc);
                     break;
                 case "8":
                     printDelayedTrainsByPriority();
+                    break;
+                case "9":
+                    simulateTrainsRunningMenu(sc);
                     break;
                 case "0":
                     running = false;
@@ -231,7 +235,7 @@ public class SchedulingSystem {
             // Train ID
             String id = TrainUtils.promptValidTrainID(sc);
             // Departure time
-            int depTime = TimeUtils.promptValidDepartureTime(sc);
+            int depTime = TimeUtils.promptValidTime(sc);
 
             // Delegate to MRT for business logic
             TrainUtils.addTrain(this, id, depTime, stationName);
@@ -267,9 +271,9 @@ public class SchedulingSystem {
         sc.nextLine(); // consume newline
 
         System.out.print("Enter the START TIME: ");
-        int startTime = TimeUtils.promptValidDepartureTime(sc);
+        int startTime = TimeUtils.promptValidTime(sc);
         System.out.print("Enter the END TIME: ");
-        int endTime = TimeUtils.promptValidDepartureTime(sc);
+        int endTime = TimeUtils.promptValidTime(sc);
         System.out.print("Enter the headway in minutes: ");
         int headway = 0;
         while (true) {
@@ -290,47 +294,80 @@ public class SchedulingSystem {
     }
 
     private void getNextTrainMenu(java.util.Scanner sc) {
-        System.out.print("Enter Station Name (Enter '0' for finding the next departing train in the system): ");
-        String stationName = sc.nextLine();
-        if (stationName.equals("0")) {
-            getNextTrain();
+        StationUtils.printStationList(stationsData.getStationMap());
+        System.out.print("Choose Station (Enter '0' for finding the next departing train in the system): ");
+        int stationNum = StationUtils.stationSelection(sc, stationsData.getStationMap());
+        if (stationNum == 0) {
+            Schedulable nextTrain = MRTManager.getNextTrain();
+            if (nextTrain != null) {
+                System.out.println("Next train in the system: " + nextTrain);
+            } else {
+                System.out.println("No trains found in the system.");
+            }
         } else {
-            getNextTrain(stationName);
+            String stationName = StationUtils.getStationName(stationNum, stationsData.getStationMap());
+            Schedulable nextTrain = MRTManager.getNextTrain(stationName);
+            if (nextTrain != null) {
+                System.out.println("Next train at " + stationName + ": " + nextTrain);
+            } else {
+                System.out.println("No trains found for station: " + stationName);
+            }
         }
     }
 
-    private void rescheduleTrainMenu(java.util.Scanner sc, Stations staticStations) {
-        System.out.print("Enter Train ID: ");
+    private void rescheduleTrainMenu(java.util.Scanner sc, Stations stationData) {
         String trainID = TrainUtils.promptValidTrainID(sc);
-        int newDep = TimeUtils.promptValidDepartureTime(sc);
-        int newStationNum = StationUtils.stationSelection(sc, staticStations.getStationMap());
+        System.out.print("Enter Current Departure Time: ");
+        int oldDep = TimeUtils.promptValidTime(sc);
+        System.out.print("Enter New Departure Time: ");
+        int newDep = TimeUtils.promptValidTime(sc);
+        StationUtils.printStationList(stationData.getStationMap());
+        System.out.print("Enter the station number (Enter 0 to keep the original station): ");
+        int newStationNum = StationUtils.stationSelection(sc, stationData.getStationMap());
         String newStation;
         if (newStationNum == 0) {
-            MRT train = (MRT) getTrainById(trainID);
+            MRT train = (MRT) MRTManager.getTrainByIdAndTime(trainID, oldDep);
             if (train != null) {
                 newStation = train.getCurrentStation();
             } else {
                 newStation = null;
             }
         } else {
-            newStation = staticStations.getStationMap().get(newStationNum);
+            newStation = StationUtils.getStationName(newStationNum, stationData.getStationMap());
         }
-        MRT.rescheduleTrain(trainID, newDep, newStation);
-        System.out.println("Train rescheduled.");
+        if (rescheduleTrain(trainID, oldDep, newDep, newStation)) {
+            System.out.println("Train rescheduled.");
+        } else {
+            System.out.println("Train not found at the specified time.");
+        }
     }
 
     private void delayTrainMenu(java.util.Scanner sc) {
-        System.out.print("Enter Train ID: ");
         String delayID = TrainUtils.promptValidTrainID(sc);
+        System.out.print("Enter Current Departure Time: ");
+        int depTime = TimeUtils.promptValidTime(sc);
         int delay = TimeUtils.promptValidDelayMinutes(sc);
-        MRT.delayTrain(delayID, delay);
-        System.out.println("Train delayed.");
+        if (delayTrain(delayID, depTime, delay)) {
+            System.out.println("Train delayed.");
+        } else {
+            System.out.println("Train not found at the specified time.");
+        }
     }
 
     private void cancelTrainMenu(java.util.Scanner sc) {
-        System.out.print("Enter Train ID: ");
-        String cancelID = sc.nextLine();
-        MRT.cancelTrain(cancelID);
-        System.out.println("Train cancelled.");
+        String cancelID = TrainUtils.promptValidTrainID(sc);
+        System.out.print("Enter Departure Time: ");
+        int depTime = TimeUtils.promptValidTime(sc);
+        if (cancelTrain(cancelID, depTime)) {
+            System.out.println("Train cancelled.");
+        } else {
+            System.out.println("Train not found at the specified time.");
+        }
+    }
+    private void simulateTrainsRunningMenu(java.util.Scanner sc) {
+        System.out.print("Enter Closing Time (HHMM): ");
+        int closingTime = TimeUtils.promptClosingTime(sc);
+        simulateTrainsRunning(closingTime);
+        System.out.println("Simulation completed.");
     }
 }
