@@ -31,4 +31,7 @@ public class Main {
         System.out.println("Exiting program. Goodbye!");
         sc.close();
     }
+
+    // PROBLEMS IN DOING METHODS AFTER SIMULATING THE TRAIN RUNNING
+    // SHOULD ASK FOR DEPARTURE TIME FOR RESCHEDULE/DELAY/CANCEL
 }

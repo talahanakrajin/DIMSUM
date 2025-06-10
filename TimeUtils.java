@@ -21,24 +21,34 @@ public final class TimeUtils {
         }
     }
 
-    /**
-     * Prompts the user until a valid HHMM time is entered and returns it.
-     * @param sc Scanner for user input.
-     * @return Validated departure time in HHMM format.
-     */
-    public static int promptValidDepartureTime(java.util.Scanner sc) {
+    public static int checkValidTime(String input) {
+        try {
+            int dep = Integer.parseInt(input);
+            formatDepartureTime(dep);
+            return dep;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input! Please enter a numeric time in HHMM format.");
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+        return -1;
+    }
+
+    public static int promptValidTime(java.util.Scanner sc) {
         while (true) {
-            System.out.print("Enter Departure Time (HHMM): ");
+            System.out.print("Enter Time (Format = HHMM): ");
             String input = sc.nextLine();
-            try {
-                int dep = Integer.parseInt(input);
-                formatDepartureTime(dep);
-                return dep;
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input! Please enter a numeric time in HHMM format.");
-            } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage());
-            }
+            int dep = checkValidTime(input);
+            if (dep != -1) return dep;
+        }
+    }
+
+    public static int promptClosingTime(java.util.Scanner sc) {
+        while (true) {
+            System.out.print("Enter Closing Time (HHMM): ");
+            String input = sc.nextLine();
+            int dep = checkValidTime(input);
+            if (dep != -1) return dep;
         }
     }
 
