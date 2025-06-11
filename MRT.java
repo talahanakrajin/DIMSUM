@@ -62,11 +62,6 @@ public class MRT extends Trains {
         this.isNorthbound = dir; // Set initial direction
 
         while (time <= closingTime) {
-            // Add this train's current state to the global schedule with current direction
-            MRT newTrain = new MRT(getTrainID(), time, stations.getStationMap().get(currentKey), dir);
-            newTrain.setDelay(getDelay()); // Preserve delay
-            MRTManager.addTrain(newTrain);
-
             // Determine next station and travel time
             int nextKey = dir ? currentKey + 1 : currentKey - 1;
             // Reverse direction at ends
@@ -76,6 +71,11 @@ public class MRT extends Trains {
                 nextKey = dir ? currentKey + 1 : currentKey - 1; // Recalculate nextKey after direction change
                 if (!stations.getStationMap().containsKey(nextKey)) break; // Safety check
             }
+
+            // Add this train's current state to the global schedule with current direction
+            MRT newTrain = new MRT(getTrainID(), time, stations.getStationMap().get(currentKey), dir);
+            newTrain.setDelay(getDelay()); // Preserve delay
+            MRTManager.addTrain(newTrain);
 
             String travelKey = currentKey + "-" + nextKey;
             Integer travelTime = dir
