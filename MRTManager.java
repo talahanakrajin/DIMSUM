@@ -2,7 +2,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.PriorityQueue;
-import java.util.Scanner;
+import java.util.ArrayList;
 
 public final class MRTManager {
     // Maps train ID to train object for quick lookup
@@ -31,6 +31,9 @@ public final class MRTManager {
             return cmp;
         }
     );
+
+    private static Schedulable earliestNorthboundTrain = null;
+    private static Schedulable earliestSouthboundTrain = null;
 
     private MRTManager() {} // Prevent instantiation
 
@@ -63,80 +66,209 @@ public final class MRTManager {
         if (earliestTrain == null || dep < earliestTrain.getDepartureTime()) {
             earliestTrain = schedule;
         }
+
+        updateEarliestTrains(schedule);
     }
 
     /**
-     * Prints all train schedules in the system.
-     * Time Complexity: O(n) where n is total number of trains
-     * Space Complexity: O(1) for printing
+     * Displays a train's information.
+     * @param train the train to display
+     * @param stationName the station name (null for system-wide display)
+     * @param isFirstTrain whether this is the first train in a group (to print headers)
      */
-    public static void printAllSchedules() {
-        for (var timeEntry : mainSchedule.entrySet()) {
-            TreeMap<String, Schedulable> trainsAtTime = timeEntry.getValue();
-            for (var trainEntry : trainsAtTime.entrySet()) {
-                Schedulable schedule = trainEntry.getValue();
-                if (schedule instanceof MRT mrt) {
-                    String direction = mrt.getDirection();
-                    String destination = direction.contains("Northbound") ? "Bundaran HI" : "Lebak Bulus";
-                    if (mrt.getDelay() == 0) {
-                        System.out.println(mrt + " | Heading To: " + destination);
-                    } else {
-                        System.out.println(mrt + " | Delayed: " + mrt.getDelay() + " min | Heading To: " + destination);
-                    }
-                }
+    public static void displayTrainSchedule(Schedulable train, String stationName, boolean isFirstTrain) {
+        if (train == null) {
+            if (stationName == null) {
+                System.out.println("No trains found in the system.");
+            } else {
+                System.out.println("No trains found for station: " + stationName);
             }
-        }
-    }
-
-    /**
-     * Prints the schedule for a specific station.
-     * Uses station-specific schedule for O(1) lookup.
-     * Time Complexity: O(m) where m is number of trains at the station
-     */
-    public static void printStationSchedule(Scanner sc, TreeMap<Integer, String> stationMap) {
-        // Show station list and get user selection
-        StationUtils.printStationList(stationMap);
-        System.out.print("Enter the station number: ");
-        int stationNum = StationUtils.stationSelection(sc, stationMap);
-        String station = StationUtils.getStationName(stationNum, stationMap);
-        StationUtils.printStationScheduleHeader(station);
-        
-        // Get station schedule directly from stationSchedule map
-        TreeMap<Integer, TreeMap<String, MRT>> stationScheduleMap = stationSchedule.get(station);
-        if (stationScheduleMap == null || stationScheduleMap.isEmpty()) {
-            System.out.println("No trains for station " + station);
             return;
         }
 
-        // Print all trains at this station
-        for (var timeEntry : stationScheduleMap.entrySet()) {
-            TreeMap<String, MRT> trainsAtTime = timeEntry.getValue();
-            for (var trainEntry : trainsAtTime.entrySet()) {
-                MRT train = trainEntry.getValue();
-                String direction = train.getDirection();
-                String destination = direction.contains("Northbound") ? "Bundaran HI" : "Lebak Bulus";
-                if (train.getDelay() == 0) {
-                    System.out.println(train + " | Heading To: " + destination);
-                } else {
-                    System.out.println(train + " | Delayed: " + train.getDelay() + " min | Heading To: " + destination);
-                }
+        if (train instanceof MRT mrt) {
+            String direction = mrt.getDirection();
+            String destination = direction.contains("Northbound") ? "Bundaran HI" : "Lebak Bulus";
+            
+            if (isFirstTrain) {
+                System.out.println("\nHeading To: " + destination);
+                System.out.println("-------------------------------");
             }
+            
+            String timeStr = String.format("%02d:%02d", train.getDepartureTime() / 100, train.getDepartureTime() % 100);
+            System.out.printf("%s - %s - %s%n",
+                timeStr,
+                mrt.getTrainID(),
+                mrt.getCurrentStation()
+            );
         }
     }
 
     /**
-     * Gets the next train in the system.
+     * Prints all train schedules in chronological order, grouped by direction.
+     * Shows all trains heading to Bundaran HI first, then all trains heading to Lebak Bulus.
+     * Each group shows schedules in chronological order.
      */
-    public static Schedulable getNextTrain() {
-        return earliestTrain;
+    public static void printAllSchedules() {
+        if (mainSchedule.isEmpty()) {
+            MRT.displayNoTrainsMessage(null);
+            return;
+        }
+
+        // First, show all trains heading to Bundaran HI
+        System.out.println("\nHeading To: Bundaran HI");
+        boolean hasNorthbound = false;
+        for (var entry : mainSchedule.entrySet()) {
+            var trains = entry.getValue();
+            for (var train : trains.values()) {
+                if (train instanceof MRT mrt && mrt.getDirection().contains("Bundaran HI")) {
+                    hasNorthbound = true;
+                    mrt.displaySchedule(null, false);
+                }
+            }
+        }
+        if (!hasNorthbound) {
+            System.out.println("No trains heading to Bundaran HI");
+        }
+        System.out.println("-------------------------------");
+
+        // Then, show all trains heading to Lebak Bulus
+        System.out.println("\nHeading To: Lebak Bulus");
+        boolean hasSouthbound = false;
+        for (var entry : mainSchedule.entrySet()) {
+            var trains = entry.getValue();
+            for (var train : trains.values()) {
+                if (train instanceof MRT mrt && mrt.getDirection().contains("Lebak Bulus")) {
+                    hasSouthbound = true;
+                    mrt.displaySchedule(null, false);
+                }
+            }
+        }
+        if (!hasSouthbound) {
+            System.out.println("No trains heading to Lebak Bulus");
+        }
+        System.out.println("-------------------------------");
+    }
+
+    /**
+     * Prints the train schedule for a specific station.
+     * Only shows trains that are heading to the opposite terminal station.
+     * For example:
+     * - At Lebak Bulus: only shows trains heading to Bundaran HI
+     * - At Bundaran HI: only shows trains heading to Lebak Bulus
+     * 
+     * @param stationName The name of the station to show schedules for
+     */
+    public static void printStationSchedule(String stationName) {
+        CurrentStation station = stations.get(stationName);
+        if (station == null) {
+            MRT.displayNoTrainsMessage(stationName);
+            return;
+        }
+
+        StationUtils.printStationScheduleHeader(stationName);
+        
+        // Determine which direction trains should be heading
+        // If we're at Lebak Bulus, we want trains going to Bundaran HI
+        // If we're at Bundaran HI, we want trains going to Lebak Bulus
+        String oppositeDirection = stationName.equals("Lebak Bulus") ? "Bundaran HI" : "Lebak Bulus";
+        
+        // Get and display northbound trains
+        // These are trains that will depart from this station going north
+        TreeMap<Integer, ArrayList<MRT>> northboundSchedule = station.getNorthboundSchedule();
+        if (!northboundSchedule.isEmpty()) {
+            boolean isFirst = true;  // Used to format the first train differently
+            for (var timeEntry : northboundSchedule.entrySet()) {
+                for (MRT train : timeEntry.getValue()) {
+                    // Only show trains heading to the opposite terminal
+                    if (train.getDirection().contains(oppositeDirection)) {
+                        train.displaySchedule(stationName, isFirst);
+                        isFirst = false;
+                    }
+                }
+            }
+            System.out.println("-------------------------------");
+        }
+
+        // Get and display southbound trains
+        // These are trains that will depart from this station going south
+        TreeMap<Integer, ArrayList<MRT>> southboundSchedule = station.getSouthboundSchedule();
+        if (!southboundSchedule.isEmpty()) {
+            boolean isFirst = true;  // Used to format the first train differently
+            for (var timeEntry : southboundSchedule.entrySet()) {
+                for (MRT train : timeEntry.getValue()) {
+                    // Only show trains heading to the opposite terminal
+                    if (train.getDirection().contains(oppositeDirection)) {
+                        train.displaySchedule(stationName, isFirst);
+                        isFirst = false;
+                    }
+                }
+            }
+            System.out.println("-------------------------------");
+        }
+
+        // If no trains are scheduled for this station, show a message
+        if (northboundSchedule.isEmpty() && southboundSchedule.isEmpty()) {
+            MRT.displayNoTrainsMessage(stationName);
+        }
+    }
+
+    /**
+     * Gets the next train in the entire system.
+     * Shows both the earliest northbound and southbound trains if they exist.
+     */
+    public static void getNextTrain() {
+        // If no trains are scheduled, show a message
+        if (earliestNorthboundTrain == null && earliestSouthboundTrain == null) {
+            MRT.displayNoTrainsMessage(null);
+            return;
+        }
+
+        // Display the earliest northbound train if it exists
+        if (earliestNorthboundTrain != null && earliestNorthboundTrain instanceof MRT northTrain) {
+            northTrain.displaySchedule(null, true);
+            System.out.println("-------------------------------");
+        }
+        // Display the earliest southbound train if it exists
+        if (earliestSouthboundTrain != null && earliestSouthboundTrain instanceof MRT southTrain) {
+            southTrain.displaySchedule(null, true);
+            System.out.println("-------------------------------");
+        }
     }
 
     /**
      * Gets the next train at a specific station.
+     * Shows both the earliest northbound and southbound trains if they exist.
+     * 
+     * @param stationName The name of the station to check
      */
-    public static Schedulable getNextTrain(String stationName) {
+    public static void getNextTrain(String stationName) {
+        // Get the station object from our stations map
         CurrentStation station = stations.get(stationName);
-        return (station == null) ? null : station.getNextTrain();
+        if (station == null) {
+            MRT.displayNoTrainsMessage(stationName);
+            return;
+        }
+
+        // Get the earliest trains from the station
+        Schedulable earliestNorth = station.getNextNorthboundTrain();
+        Schedulable earliestSouth = station.getNextSouthboundTrain();
+
+        // Display the earliest northbound train if it exists
+        if (earliestNorth != null && earliestNorth instanceof MRT northTrain) {
+            northTrain.displaySchedule(stationName, true);
+            System.out.println("-------------------------------");
+        }
+        // Display the earliest southbound train if it exists
+        if (earliestSouth != null && earliestSouth instanceof MRT southTrain) {
+            southTrain.displaySchedule(stationName, true);
+            System.out.println("-------------------------------");
+        }
+        // If no trains are scheduled, show a message
+        if ((earliestNorth == null || !(earliestNorth instanceof MRT)) && 
+            (earliestSouth == null || !(earliestSouth instanceof MRT))) {
+            MRT.displayNoTrainsMessage(stationName);
+        }
     }
 
     /**
@@ -156,7 +288,7 @@ public final class MRTManager {
      * Delays a train and updates its schedule.
      * @return true if train was found and delayed, false otherwise
      */
-    public static boolean delayTrain(String trainID, int departureTime, int delayMinutes) {
+    public static boolean delayTrain(String trainID, int departureTime, int delayMinutes, String reason) {
         Schedulable schedule = getTrainByIdAndTime(trainID, departureTime);
         if (schedule == null) return false;
         
@@ -166,7 +298,11 @@ public final class MRTManager {
         removeFromSchedules(train);
         
         // Update delay and departure time
-        train.setDelay(train.getDelay() + delayMinutes);
+        if (train instanceof MRT mrt) {
+            mrt.setDelay(delayMinutes, reason);
+        } else {
+            train.setDelay(train.getDelay() + delayMinutes);
+        }
         int newDepartureTime = TimeUtils.addMinutesToDepTime(train.getDepartureTime(), delayMinutes);
         train.setDepartureTime(newDepartureTime);
         
@@ -180,19 +316,32 @@ public final class MRTManager {
     }
 
     /**
-     * Prints all delayed trains sorted by delay time.
-     * Time Complexity: O(n log n) where n is number of delayed trains
+     * Prints all delayed trains.
      */
-    public static void printDelayedTrainsByPriority() {
+    public static void printDelayedTrains() {
+        if (delayQueue.isEmpty()) {
+            System.out.println("No delayed trains.");
+            return;
+        }
+
+        System.out.println("\n=== Delayed Trains ===");
+        
+        // First pass: group trains by destination
         PriorityQueue<Schedulable> copy = new PriorityQueue<>(delayQueue);
         while (!copy.isEmpty()) {
-            Trains train = (Trains) copy.poll();
-            if (train instanceof MRT mrt) {
+            Schedulable schedule = copy.poll();
+            if (schedule instanceof MRT mrt) {
                 String direction = mrt.getDirection();
                 String destination = direction.contains("Northbound") ? "Bundaran HI" : "Lebak Bulus";
-                System.out.println(train + " | Delayed: " + train.getDelay() + " min | Heading To: " + destination);
-            } else {
-                System.out.println(train + " | Delayed: " + train.getDelay() + " min");
+                System.out.println("\nHeading To: " + destination);
+                System.out.println("-------------------------------");
+                String timeStr = String.format("%02d:%02d", schedule.getDepartureTime() / 100, schedule.getDepartureTime() % 100);
+                System.out.printf("%s - %s - %s%n",
+                    timeStr,
+                    mrt.getTrainID(),
+                    mrt.getCurrentStation()
+                );
+                System.out.println("-------------------------------");
             }
         }
     }
@@ -278,6 +427,8 @@ public final class MRTManager {
                 }
             }
         }
+
+        updateEarliestTrainsAfterRemoval(train);
     }
 
     public static Schedulable getTrainById(String id) {
@@ -301,17 +452,53 @@ public final class MRTManager {
         }
     }
 
-    public static void getNextTrainAtStation(Scanner sc, TreeMap<Integer, String> stationMap) {
-        StationUtils.printStationList(stationMap);
-        int stationNum = StationUtils.stationSelection(sc, stationMap);
-        String station = StationUtils.getStationName(stationNum, stationMap);
-        
-        CurrentStation currentStation = stations.get(station);
-        Schedulable nextTrain = (currentStation == null) ? null : currentStation.getNextTrain();
-        if (nextTrain != null) {
-            System.out.println("Next train at " + station + ": " + nextTrain);
-        } else {
-            System.out.println("No trains found for station: " + station);
+    /**
+     * Updates the earliest trains when a new train is added.
+     */
+    private static void updateEarliestTrains(Schedulable train) {
+        if (train instanceof MRT mrt) {
+            if (mrt.isNorthbound()) {
+                if (earliestNorthboundTrain == null || mrt.isEarlierThan(earliestNorthboundTrain)) {
+                    earliestNorthboundTrain = train;
+                }
+            } else {
+                if (earliestSouthboundTrain == null || mrt.isEarlierThan(earliestSouthboundTrain)) {
+                    earliestSouthboundTrain = train;
+                }
+            }
+        }
+    }
+
+    /**
+     * Updates the earliest trains when a train is removed.
+     */
+    private static void updateEarliestTrainsAfterRemoval(Schedulable train) {
+        if (train instanceof MRT mrt) {
+            if (mrt.isNorthbound() && train == earliestNorthboundTrain) {
+                // Find new earliest northbound train
+                earliestNorthboundTrain = null;
+                for (var station : stations.values()) {
+                    Schedulable next = station.getNextNorthboundTrain();
+                    if (next instanceof MRT nextTrain && 
+                        (earliestNorthboundTrain == null || nextTrain.isEarlierThan(earliestNorthboundTrain))) {
+                        earliestNorthboundTrain = next;
+                    }
+                }
+            } else if (!mrt.isNorthbound() && train == earliestSouthboundTrain) {
+                // Find new earliest southbound train
+                earliestSouthboundTrain = null;
+                for (var station : stations.values()) {
+                    Schedulable next = station.getNextSouthboundTrain();
+                    if (next instanceof MRT nextTrain && 
+                        (earliestSouthboundTrain == null || nextTrain.isEarlierThan(earliestSouthboundTrain))) {
+                        earliestSouthboundTrain = next;
+                    }
+                }
+            }
         }
     }
 }
+
+
+
+

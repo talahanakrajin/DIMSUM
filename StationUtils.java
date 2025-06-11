@@ -88,4 +88,13 @@ public final class StationUtils {
         }
         return stationNum < 13; // If not at Bundaran HI (13), train is northbound
     }
+
+    /**
+     * Determines if a train at a given station should be northbound.
+     * @param stationNum The number of the station
+     * @return true if the train should be northbound, false if southbound
+     */
+    public static boolean isNorthbound(int stationNum) {
+        return stationNum < 13; // If not at Bundaran HI (13), train is northbound
+    }
 }

@@ -66,6 +66,9 @@ public abstract class Trains implements Schedulable {
     @Override
     public int getDepartureTime() { return departureTime; }
 
+    /** Get the direction of the train */
+    public abstract String getDirection();
+
     /** String representation of the train */
     @Override
     public String toString() {
