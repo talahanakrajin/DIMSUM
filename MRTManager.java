@@ -214,35 +214,84 @@ public final class MRTManager {
     }
 
     /**
+     * Gets the current time in HHMM format.
+     * @return current time as integer (e.g., 1430 for 2:30 PM)
+     */
+    private static int getCurrentTime() {
+        java.time.LocalTime now = java.time.LocalTime.now();
+        int time = now.getHour() * 100 + now.getMinute();
+        //System.out.println("DEBUG: Current time is " + time);
+        return time;
+    }
+
+    /**
      * Gets the next train in the entire system.
      * Shows both the earliest northbound and southbound trains if they exist.
+     * Only shows trains that haven't departed yet based on current time.
      */
     public static void getNextTrain() {
+        int currentTime = getCurrentTime();
+        
         // If no trains are scheduled, show a message
-        if (earliestNorthboundTrain == null && earliestSouthboundTrain == null) {
+        if (mainSchedule.isEmpty()) {
             MRT.displayNoTrainsMessage(null);
             return;
         }
 
-        // Display the earliest northbound train if it exists
-        if (earliestNorthboundTrain != null && earliestNorthboundTrain instanceof MRT northTrain) {
-            northTrain.displaySchedule(null, true);
-            System.out.println("-------------------------------");
+        boolean hasFutureTrains = false;
+        boolean isFirstNorthbound = true;
+        boolean isFirstSouthbound = true;
+
+        // Find next available northbound train
+        for (var timeEntry : mainSchedule.entrySet()) {
+            int time = timeEntry.getKey();
+            if (time >= currentTime) {
+                for (var train : timeEntry.getValue().values()) {
+                    if (train instanceof MRT mrt && mrt.isNorthbound()) {
+                        mrt.displaySchedule(null, isFirstNorthbound);
+                        System.out.println("-------------------------------");
+                        hasFutureTrains = true;
+                        isFirstNorthbound = false;
+                        break;
+                    }
+                }
+                break;
+            }
         }
-        // Display the earliest southbound train if it exists
-        if (earliestSouthboundTrain != null && earliestSouthboundTrain instanceof MRT southTrain) {
-            southTrain.displaySchedule(null, true);
-            System.out.println("-------------------------------");
+
+        // Find next available southbound train
+        for (var timeEntry : mainSchedule.entrySet()) {
+            int time = timeEntry.getKey();
+            if (time >= currentTime) {
+                for (var train : timeEntry.getValue().values()) {
+                    if (train instanceof MRT mrt && !mrt.isNorthbound()) {
+                        mrt.displaySchedule(null, isFirstSouthbound);
+                        System.out.println("-------------------------------");
+                        hasFutureTrains = true;
+                        isFirstSouthbound = false;
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+
+        // If no future trains are found, show a message
+        if (!hasFutureTrains) {
+            System.out.println("No more trains scheduled for today.");
         }
     }
 
     /**
      * Gets the next train at a specific station.
      * Shows both the earliest northbound and southbound trains if they exist.
+     * Only shows trains that haven't departed yet based on current time.
      * 
      * @param stationName The name of the station to check
      */
     public static void getNextTrain(String stationName) {
+        int currentTime = getCurrentTime();
+        
         // Get the station object from our stations map
         CurrentStation station = stations.get(stationName);
         if (station == null) {
@@ -250,24 +299,47 @@ public final class MRTManager {
             return;
         }
 
-        // Get the earliest trains from the station
-        Schedulable earliestNorth = station.getNextNorthboundTrain();
-        Schedulable earliestSouth = station.getNextSouthboundTrain();
+        boolean hasFutureTrains = false;
+        boolean isFirstNorthbound = true;
+        boolean isFirstSouthbound = true;
 
-        // Display the earliest northbound train if it exists
-        if (earliestNorth != null && earliestNorth instanceof MRT northTrain) {
-            northTrain.displaySchedule(stationName, true);
-            System.out.println("-------------------------------");
+        // Get all trains from the station
+        TreeMap<Integer, ArrayList<MRT>> northboundSchedule = station.getNorthboundSchedule();
+        TreeMap<Integer, ArrayList<MRT>> southboundSchedule = station.getSouthboundSchedule();
+
+        // Find next available northbound train
+        for (var timeEntry : northboundSchedule.entrySet()) {
+            int time = timeEntry.getKey();
+            if (time >= currentTime) {
+                for (MRT train : timeEntry.getValue()) {
+                    train.displaySchedule(stationName, isFirstNorthbound);
+                    System.out.println("-------------------------------");
+                    hasFutureTrains = true;
+                    isFirstNorthbound = false;
+                    break;
+                }
+                break;
+            }
         }
-        // Display the earliest southbound train if it exists
-        if (earliestSouth != null && earliestSouth instanceof MRT southTrain) {
-            southTrain.displaySchedule(stationName, true);
-            System.out.println("-------------------------------");
+
+        // Find next available southbound train
+        for (var timeEntry : southboundSchedule.entrySet()) {
+            int time = timeEntry.getKey();
+            if (time >= currentTime) {
+                for (MRT train : timeEntry.getValue()) {
+                    train.displaySchedule(stationName, isFirstSouthbound);
+                    System.out.println("-------------------------------");
+                    hasFutureTrains = true;
+                    isFirstSouthbound = false;
+                    break;
+                }
+                break;
+            }
         }
-        // If no trains are scheduled, show a message
-        if ((earliestNorth == null || !(earliestNorth instanceof MRT)) && 
-            (earliestSouth == null || !(earliestSouth instanceof MRT))) {
-            MRT.displayNoTrainsMessage(stationName);
+
+        // If no future trains are found, show a message
+        if (!hasFutureTrains) {
+            System.out.println("No more trains scheduled for today at " + stationName);
         }
     }
 
