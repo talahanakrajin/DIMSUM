@@ -110,7 +110,7 @@ public class MRT extends Trains {
         
         // Display train details in the original format
         if (isDelayed()) {
-            System.out.printf("%s - %s - %s | Delayed: %d minutes (%s)%n",
+            System.out.printf("%s - %s - %s | Delayed: %d minutes (Reason: %s)%n",
                 timeStr,
                 getTrainID(),
                 getCurrentStation(),
