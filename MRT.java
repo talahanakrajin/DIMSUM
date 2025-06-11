@@ -4,6 +4,9 @@
  */
 public class MRT extends Trains {
     private boolean isNorthbound; // Track direction
+    private boolean isDelayed = false;
+    private int delayDuration = 0;
+    private String delayReason = "";
 
     /**
      * Constructor for MRT.
@@ -37,23 +40,11 @@ public class MRT extends Trains {
         return -1;
     }
 
+    @Override
     public String getDirection() {
-        if (isNorthbound) {
-            return "Northbound (Lebak Bulus → Bundaran HI)";
-        } else {
-            return "Southbound (Bundaran HI → Lebak Bulus)";
-        }
+        return isNorthbound ? "Bundaran HI" : "Lebak Bulus";
     }
 
-    /**
-     * Simulate this train moving back and forth through the system, creating new schedules,
-     * until the given closing time is reached.
-     * Each time the train reaches a new station, it is added to the global schedule.
-     *
-     * @param stations Stations object containing station and travel time data
-     * @param forward  Initial direction (true for forward, false for backward)
-     * @param closingTime The time (HHMM) after which simulation stops
-     */
     @Override
     public void simulateJourney(Stations stations, boolean forward, int closingTime) {
         int currentKey = -1;
@@ -82,7 +73,8 @@ public class MRT extends Trains {
             if (!stations.getStationMap().containsKey(nextKey)) {
                 dir = !dir;
                 this.isNorthbound = dir; // Update direction when reversing
-                continue;
+                nextKey = dir ? currentKey + 1 : currentKey - 1; // Recalculate nextKey after direction change
+                if (!stations.getStationMap().containsKey(nextKey)) break; // Safety check
             }
 
             String travelKey = currentKey + "-" + nextKey;
@@ -99,6 +91,120 @@ public class MRT extends Trains {
             // If after moving, time exceeds closingTime, stop
             if (time > closingTime) break;
         }
+    }
+
+    /**
+     * Displays the train schedule.
+     * @param stationName The station name to display (null for system-wide display)
+     * @param isFirst Whether this is the first train in a list
+     */
+    public void displaySchedule(String stationName, boolean isFirst) {
+        // If this is the first train in a list, show the direction header
+        if (isFirst) {
+            System.out.println("\nHeading To: " + getDirection());
+            System.out.println("-------------------------------");
+        }
+
+        // Format time as HH:MM
+        String timeStr = String.format("%02d:%02d", getDepartureTime() / 100, getDepartureTime() % 100);
+        
+        // Display train details in the original format
+        if (isDelayed()) {
+            System.out.printf("%s - %s - %s | Delayed: %d minutes (%s)%n",
+                timeStr,
+                getTrainID(),
+                getCurrentStation(),
+                getDelayDuration(),
+                getDelayReason()
+            );
+        } else {
+            System.out.printf("%s - %s - %s%n",
+                timeStr,
+                getTrainID(),
+                getCurrentStation()
+            );
+        }
+    }
+
+    /**
+     * Displays a message when no trains are available.
+     * @param stationName The station name to display (null for system-wide display)
+     */
+    public static void displayNoTrainsMessage(String stationName) {
+        if (stationName != null) {
+            System.out.println("No trains scheduled for station: " + stationName);
+        } else {
+            System.out.println("No trains scheduled in the system.");
+        }
+    }
+
+    /**
+     * Checks if the train is delayed.
+     * @return true if the train is delayed, false otherwise
+     */
+    public boolean isDelayed() {
+        return isDelayed;
+    }
+
+    /**
+     * Gets the delay duration in minutes.
+     * @return the delay duration
+     */
+    public int getDelayDuration() {
+        return delayDuration;
+    }
+
+    /**
+     * Gets the reason for the delay.
+     * @return the delay reason
+     */
+    public String getDelayReason() {
+        return delayReason;
+    }
+
+    /**
+     * Sets the delay information for the train.
+     * @param duration The delay duration in minutes
+     * @param reason The reason for the delay
+     */
+    public void setDelay(int duration, String reason) {
+        this.isDelayed = true;
+        this.delayDuration = duration;
+        this.delayReason = reason;
+    }
+
+    /**
+     * Clears the delay information for the train.
+     */
+    public void clearDelay() {
+        this.isDelayed = false;
+        this.delayDuration = 0;
+        this.delayReason = "";
+    }
+
+    /**
+     * Checks if the train is heading northbound.
+     * @return true if the train is heading northbound, false otherwise
+     */
+    public boolean isNorthbound() {
+        return isNorthbound;
+    }
+
+    /**
+     * Checks if this train departs earlier than another train.
+     * @param other The train to compare with
+     * @return true if this train departs earlier, false otherwise
+     */
+    public boolean isEarlierThan(Schedulable other) {
+        return getDepartureTime() < other.getDepartureTime();
+    }
+
+    /**
+     * Gets the opposite terminal station.
+     * @return "Bundaran HI" if heading to Lebak Bulus, "Lebak Bulus" if heading to Bundaran HI
+     */
+    public String getOppositeTerminal() {
+        return isNorthbound() ? "Bundaran HI" : "Lebak Bulus";
     }
 }
 
