@@ -152,10 +152,11 @@ public final class MRTManager {
 
     /**
      * Prints the train schedule for a specific station.
-     * Only shows trains that are heading to the opposite terminal station.
+     * Shows trains in both directions except at terminus stations.
      * For example:
      * - At Lebak Bulus: only shows trains heading to Bundaran HI
      * - At Bundaran HI: only shows trains heading to Lebak Bulus
+     * - At other stations: shows trains in both directions
      * 
      * @param stationName The name of the station to show schedules for
      */
@@ -168,40 +169,37 @@ public final class MRTManager {
 
         StationUtils.printStationScheduleHeader(stationName);
         
-        // Determine which direction trains should be heading
-        // If we're at Lebak Bulus, we want trains going to Bundaran HI
-        // If we're at Bundaran HI, we want trains going to Lebak Bulus
-        String oppositeDirection = stationName.equals("Lebak Bulus") ? "Bundaran HI" : "Lebak Bulus";
-        
         // Get and display northbound trains
-        // These are trains that will depart from this station going north
         TreeMap<Integer, ArrayList<MRT>> northboundSchedule = station.getNorthboundSchedule();
         if (!northboundSchedule.isEmpty()) {
-            boolean isFirst = true;  // Used to format the first train differently
+            boolean isFirst = true;
             for (var timeEntry : northboundSchedule.entrySet()) {
                 for (MRT train : timeEntry.getValue()) {
-                    // Only show trains heading to the opposite terminal
-                    if (train.getDirection().contains(oppositeDirection)) {
-                        train.displaySchedule(stationName, isFirst);
-                        isFirst = false;
-                    }
+                    // At Lebak Bulus, only show trains heading to Bundaran HI
+                    if (stationName.equals("Lebak Bulus") && !train.isNorthbound()) continue;
+                    // At Bundaran HI, only show trains heading to Lebak Bulus
+                    if (stationName.equals("Bundaran HI") && train.isNorthbound()) continue;
+                    
+                    train.displaySchedule(stationName, isFirst);
+                    isFirst = false;
                 }
             }
             System.out.println("-------------------------------");
         }
 
         // Get and display southbound trains
-        // These are trains that will depart from this station going south
         TreeMap<Integer, ArrayList<MRT>> southboundSchedule = station.getSouthboundSchedule();
         if (!southboundSchedule.isEmpty()) {
-            boolean isFirst = true;  // Used to format the first train differently
+            boolean isFirst = true;
             for (var timeEntry : southboundSchedule.entrySet()) {
                 for (MRT train : timeEntry.getValue()) {
-                    // Only show trains heading to the opposite terminal
-                    if (train.getDirection().contains(oppositeDirection)) {
-                        train.displaySchedule(stationName, isFirst);
-                        isFirst = false;
-                    }
+                    // At Lebak Bulus, only show trains heading to Bundaran HI
+                    if (stationName.equals("Lebak Bulus") && !train.isNorthbound()) continue;
+                    // At Bundaran HI, only show trains heading to Lebak Bulus
+                    if (stationName.equals("Bundaran HI") && train.isNorthbound()) continue;
+                    
+                    train.displaySchedule(stationName, isFirst);
+                    isFirst = false;
                 }
             }
             System.out.println("-------------------------------");
