@@ -117,6 +117,7 @@ public final class MRTManager {
 
         // First, show all trains heading to Bundaran HI
         System.out.println("\nHeading To: Bundaran HI");
+        System.out.println("-------------------------------");
         boolean hasNorthbound = false;
         for (var entry : mainSchedule.entrySet()) {
             var trains = entry.getValue();
@@ -134,6 +135,7 @@ public final class MRTManager {
 
         // Then, show all trains heading to Lebak Bulus
         System.out.println("\nHeading To: Lebak Bulus");
+        System.out.println("-------------------------------");
         boolean hasSouthbound = false;
         for (var entry : mainSchedule.entrySet()) {
             var trains = entry.getValue();
@@ -315,6 +317,7 @@ public final class MRTManager {
 
     /**
      * Prints all delayed trains.
+     * Shows trains grouped by direction, with delay information.
      */
     public static void printDelayedTrains() {
         if (delayQueue.isEmpty()) {
@@ -322,26 +325,35 @@ public final class MRTManager {
             return;
         }
 
-        System.out.println("\n=== Delayed Trains ===");
-        
-        // First pass: group trains by destination
-        PriorityQueue<Schedulable> copy = new PriorityQueue<>(delayQueue);
-        while (!copy.isEmpty()) {
-            Schedulable schedule = copy.poll();
-            if (schedule instanceof MRT mrt) {
-                String direction = mrt.getDirection();
-                String destination = direction.contains("Northbound") ? "Bundaran HI" : "Lebak Bulus";
-                System.out.println("\nHeading To: " + destination);
-                System.out.println("-------------------------------");
-                String timeStr = String.format("%02d:%02d", schedule.getDepartureTime() / 100, schedule.getDepartureTime() % 100);
-                System.out.printf("%s - %s - %s%n",
-                    timeStr,
-                    mrt.getTrainID(),
-                    mrt.getCurrentStation()
-                );
-                System.out.println("-------------------------------");
+        // First, show all delayed trains heading to Bundaran HI
+        System.out.println("\nHeading To: Bundaran HI");
+        System.out.println("-------------------------------");
+        boolean hasNorthbound = false;
+        for (var train : delayQueue) {
+            if (train instanceof MRT mrt && mrt.isNorthbound()) {
+                hasNorthbound = true;
+                mrt.displaySchedule(null, !hasNorthbound);
             }
         }
+        if (!hasNorthbound) {
+            System.out.println("No delayed trains heading to Bundaran HI");
+        }
+        System.out.println("-------------------------------");
+
+        // Then, show all delayed trains heading to Lebak Bulus
+        System.out.println("\nHeading To: Lebak Bulus");
+        System.out.println("-------------------------------");
+        boolean hasSouthbound = false;
+        for (var train : delayQueue) {
+            if (train instanceof MRT mrt && !mrt.isNorthbound()) {
+                hasSouthbound = true;
+                mrt.displaySchedule(null, !hasSouthbound);
+            }
+        }
+        if (!hasSouthbound) {
+            System.out.println("No delayed trains heading to Lebak Bulus");
+        }
+        System.out.println("-------------------------------");
     }
 
     /**
