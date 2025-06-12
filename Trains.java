@@ -78,6 +78,13 @@ public abstract class Trains implements Schedulable {
     public abstract void simulateJourney(Stations stations, boolean forward, int steps);
 
     /**
+     * Abstract method to get the direction of the train.
+     * Must be implemented by concrete train classes.
+     * @return The direction as a string
+     */
+    public abstract String getDirection();
+
+    /**
      * Sets the departure time (from Schedulable interface).
      * @param departureTime The new departure time
      */
@@ -90,13 +97,6 @@ public abstract class Trains implements Schedulable {
      */
     @Override
     public int getDepartureTime() { return departureTime; }
-
-    /**
-     * Abstract method to get the direction of the train.
-     * Must be implemented by concrete train classes.
-     * @return The direction as a string
-     */
-    public abstract String getDirection();
 
     /**
      * Returns a string representation of the train.
