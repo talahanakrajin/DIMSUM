@@ -1,14 +1,21 @@
 /**
- * Utility class for time validation and calculation.
+ * Utility class for time validation and calculation in the MRT system.
+ * This class provides methods for:
+ * - Validating time formats
+ * - Converting between time formats
+ * - Adding minutes to times with proper wrap-around
+ * - Handling user input for time-related operations
  * Demonstrates use of static methods and exception handling.
  */
 public final class TimeUtils {
+    /** Private constructor to prevent instantiation */
     private TimeUtils() {}
 
     /**
      * Validates that a time is in HHMM format, between 0000 and 2359.
-     * @param time The time to validate.
-     * @throws IllegalArgumentException if the time is invalid.
+     * Checks both the overall range and the individual hour/minute components.
+     * @param time The time to validate
+     * @throws IllegalArgumentException if the time is invalid
      */
     public static void formatDepartureTime(int time) {
         if (time < 0 || time > 2359) {
@@ -21,6 +28,11 @@ public final class TimeUtils {
         }
     }
 
+    /**
+     * Validates a time string input and converts it to an integer.
+     * @param input The time string to validate
+     * @return The validated time as an integer, or -1 if invalid
+     */
     public static int checkValidTime(String input) {
         try {
             int dep = Integer.parseInt(input);
@@ -34,6 +46,12 @@ public final class TimeUtils {
         return -1;
     }
 
+    /**
+     * Prompts the user for a valid time input.
+     * Continues prompting until a valid time is entered.
+     * @param sc Scanner for user input
+     * @return A valid time in HHMM format
+     */
     public static int promptValidTime(java.util.Scanner sc) {
         while (true) {
             System.out.print("Enter Time (Format = HHMM): ");
@@ -43,6 +61,12 @@ public final class TimeUtils {
         }
     }
 
+    /**
+     * Prompts the user for a valid closing time input.
+     * Continues prompting until a valid time is entered.
+     * @param sc Scanner for user input
+     * @return A valid closing time in HHMM format
+     */
     public static int promptClosingTime(java.util.Scanner sc) {
         while (true) {
             System.out.print("Enter Closing Time (HHMM): ");
@@ -53,9 +77,10 @@ public final class TimeUtils {
     }
 
     /**
-     * Prompts the user until a valid positive integer is entered for delay minutes.
-     * @param sc Scanner for user input.
-     * @return Validated delay minutes (positive integer).
+     * Prompts the user for a valid delay duration.
+     * Continues prompting until a positive integer is entered.
+     * @param sc Scanner for user input
+     * @return A valid delay duration in minutes
      */
     public static int promptValidDelayMinutes(java.util.Scanner sc) {
         while (true) {
@@ -76,22 +101,26 @@ public final class TimeUtils {
     }
 
     /**
-     * Adds minutes to a time in HHMM format, with wrap-around at 24 hours.
-     * @param depTime The original time.
-     * @param minutesToAdd Minutes to add.
-     * @return The new time in HHMM format.
+     * Adds minutes to a time in HHMM format, with proper 24-hour wrap-around.
+     * For example, adding 30 minutes to 2350 results in 0020.
+     * @param depTime The original time in HHMM format
+     * @param minutesToAdd The number of minutes to add
+     * @return The new time in HHMM format
      */
     public static int addMinutesToDepTime(int depTime, int minutesToAdd) {
-        int hours = depTime / 100;
-        int minutes = depTime % 100;
-        minutes += minutesToAdd;
-        hours += minutes / 60;
-        minutes = minutes % 60;
-        hours = hours % 24;
-        int result = hours * 100 + minutes;
-        if (result < 0 || result > 2359) {
-            throw new IllegalArgumentException("Resulting departure time must be between 0000 and 2359, got: " + String.format("%04d", result));
-        }
-        return result;
+        // Convert HHMM to total minutes
+        int totalMinutes = (depTime / 100) * 60 + (depTime % 100);
+        
+        // Add the delay minutes
+        totalMinutes += minutesToAdd;
+        
+        // Handle 24-hour wrap-around
+        totalMinutes = totalMinutes % (24 * 60);
+        
+        // Convert back to HHMM format
+        int hours = totalMinutes / 60;
+        int minutes = totalMinutes % 60;
+        
+        return hours * 100 + minutes;
     }
 }

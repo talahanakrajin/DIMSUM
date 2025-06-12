@@ -1,17 +1,30 @@
 import java.util.TreeMap;
 
 /**
- * Holds static station and travel time data.
+ * Holds static station and travel time data for the MRT system.
+ * This class maintains the complete network information including:
+ * - Station names and their order
+ * - Travel times between stations in both directions
+ * - Terminus halt times
  * Demonstrates use of Java Collections, instance variables, and defensive copying for immutability.
  */
 public class Stations {
+    /** Map of station numbers to station names */
     private final TreeMap<Integer, String> stationMap;
+    
+    /** Map of station pairs to forward travel times */
     private final TreeMap<String, Integer> forwardTravelTimeMap;
+    
+    /** Map of station pairs to backward travel times */
     private final TreeMap<String, Integer> backwardTravelTimeMap;
 
-    private final int terminusHaltTime = 3; // Time in minutes where the train halts at the terminus station (should be customizable)
+    /** Time in minutes where trains halt at terminus stations */
+    private final int terminusHaltTime = 3;
 
-    /** Constructor initializes station and travel time data. */
+    /** 
+     * Constructor initializes station and travel time data.
+     * Creates and populates all necessary data structures.
+     */
     public Stations() {
         stationMap = new TreeMap<>();
         forwardTravelTimeMap = new TreeMap<>();
@@ -20,7 +33,11 @@ public class Stations {
         initializeTravelTimes();
     }
 
-    /** Initializes the station map. */
+    /** 
+     * Initializes the station map with all stations in the system.
+     * Stations are numbered from 1 to 13, with Lebak Bulus as 1
+     * and Bundaran HI as 13.
+     */
     private void initializeStations() {
         stationMap.put(1, "Lebak Bulus");
         stationMap.put(2, "Fatmawati");
@@ -37,9 +54,13 @@ public class Stations {
         stationMap.put(13, "Bundaran HI");
     }
 
-    /** Initializes the travel time maps. */
+    /** 
+     * Initializes the travel time maps for both directions.
+     * Travel times are stored as minutes between stations.
+     * Includes terminus halt times at the end stations.
+     */
     private void initializeTravelTimes() {
-        // Forward travel times
+        // Forward travel times (northbound)
         forwardTravelTimeMap.put("1-2", 3);  // Lebak Bulus -> Fatmawati
         forwardTravelTimeMap.put("2-3", 3);  // Fatmawati -> Cipete Raya
         forwardTravelTimeMap.put("3-4", 2);  // Cipete Raya -> Haji Nawi
@@ -53,7 +74,7 @@ public class Stations {
         forwardTravelTimeMap.put("11-12", 2); // Setiabudi -> Dukuh Atas
         forwardTravelTimeMap.put("12-13", 3 + terminusHaltTime); // Dukuh Atas -> Bundaran HI
 
-        // Backward travel times
+        // Backward travel times (southbound)
         backwardTravelTimeMap.put("13-12", 3); // Bundaran HI -> Dukuh Atas
         backwardTravelTimeMap.put("12-11", 2); // Dukuh Atas -> Setiabudi
         backwardTravelTimeMap.put("11-10", 2); // Setiabudi -> Bendungan Hilir
@@ -68,18 +89,27 @@ public class Stations {
         backwardTravelTimeMap.put("2-1", 3 + terminusHaltTime); // Fatmawati -> Lebak Bulus
     }
 
-    /** @return a defensive copy of the station map */
+    /** 
+     * @return A defensive copy of the station map
+     * This prevents external modification of the internal data structure
+     */
     public TreeMap<Integer, String> getStationMap() {
-        return new TreeMap<>(stationMap); // Defensive copy for immutability
+        return new TreeMap<>(stationMap);
     }
 
-    /** @return a defensive copy of the forward travel time map */
+    /** 
+     * @return A defensive copy of the forward travel time map
+     * This prevents external modification of the internal data structure
+     */
     public TreeMap<String, Integer> getForwardTravelTimeMap() {
-        return new TreeMap<>(forwardTravelTimeMap); // Defensive copy
+        return new TreeMap<>(forwardTravelTimeMap);
     }
 
-    /** @return a defensive copy of the backward travel time map */
+    /** 
+     * @return A defensive copy of the backward travel time map
+     * This prevents external modification of the internal data structure
+     */
     public TreeMap<String, Integer> getBackwardTravelTimeMap() {
-        return new TreeMap<>(backwardTravelTimeMap); // Defensive copy
+        return new TreeMap<>(backwardTravelTimeMap);
     }
 }

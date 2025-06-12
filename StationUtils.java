@@ -1,10 +1,26 @@
+/**
+ * Utility class for station-related operations in the MRT system.
+ * This class provides methods for:
+ * - Validating station numbers
+ * - Displaying station information
+ * - Determining train directions
+ * - Managing station selection
+ * Demonstrates use of static methods and utility functions.
+ */
 import java.util.Scanner;
 import java.util.TreeMap;
 
 public final class StationUtils {
-    private StationUtils() {} // Prevent instantiation
+    /** Private constructor to prevent instantiation */
+    private StationUtils() {}
 
-    // Make these static so they can be used from anywhere
+    /**
+     * Validates a station number input from the user.
+     * Continues prompting until a valid station number is entered.
+     * @param sc Scanner for user input
+     * @param stationMap Map of station numbers to names
+     * @return A valid station number
+     */
     public static int checkStationNumber(Scanner sc, TreeMap<Integer, String> stationMap) {
         int stationNumber = -1;
         boolean validInput = false;
@@ -27,6 +43,8 @@ public final class StationUtils {
 
     /**
      * Prints the list of stations with their numbers.
+     * Displays all stations in the system in a formatted list.
+     * @param stationMap Map of station numbers to names
      */
     public static void printStationList(TreeMap<Integer, String> stationMap) {
         System.out.println("\nList of stations:");
@@ -37,6 +55,10 @@ public final class StationUtils {
 
     /**
      * Prompts user to select a station and returns the station number.
+     * Allows selection of station 0 for system-wide operations.
+     * @param sc Scanner for user input
+     * @param stationMap Map of station numbers to names
+     * @return Selected station number (0 for system-wide)
      */
     public static int stationSelection(Scanner sc, TreeMap<Integer, String> stationMap) {
         int stationNum = -1;
@@ -60,6 +82,9 @@ public final class StationUtils {
 
     /**
      * Gets the station name from the station number.
+     * @param stationNum The station number to look up
+     * @param stationMap Map of station numbers to names
+     * @return The name of the station
      */
     public static String getStationName(int stationNum, TreeMap<Integer, String> stationMap) {
         return stationMap.get(stationNum);
@@ -67,6 +92,7 @@ public final class StationUtils {
 
     /**
      * Prints the schedule header for a specific station.
+     * @param stationName The name of the station to display
      */
     public static void printStationScheduleHeader(String stationName) {
         System.out.println("\nSchedule for " + stationName + ":");
@@ -74,6 +100,7 @@ public final class StationUtils {
 
     /**
      * Determines if a train at a given station should be northbound.
+     * Uses station number to determine direction (northbound if not at Bundaran HI).
      * @param stationName The name of the station
      * @return true if the train should be northbound, false if southbound
      */
@@ -91,6 +118,7 @@ public final class StationUtils {
 
     /**
      * Determines if a train at a given station should be northbound.
+     * Uses station number to determine direction (northbound if not at Bundaran HI).
      * @param stationNum The number of the station
      * @return true if the train should be northbound, false if southbound
      */

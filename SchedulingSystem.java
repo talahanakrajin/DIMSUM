@@ -65,7 +65,7 @@ public class SchedulingSystem {
             System.out.println("1. View all schedules");
             System.out.println("2. View schedules for a station");
             System.out.println("3. Find next departing train at a station");
-            System.out.println("0. Exit");
+            System.out.println("0. Exit (Back to Main Menu)");
             System.out.print("Choose an option: ");
             String choice = sc.nextLine();
 
@@ -102,7 +102,7 @@ public class SchedulingSystem {
             System.out.println("7. Find next departing train");
             System.out.println("8. View delayed trains by priority");
             System.out.println("9. Simulate trains running");
-            System.out.println("0. Exit");
+            System.out.println("0. Exit (Back to Main Menu)");
             System.out.print("Choose an option: ");
             String choice = sc.nextLine();
 

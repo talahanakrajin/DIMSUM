@@ -5,13 +5,13 @@ import java.util.PriorityQueue;
 import java.util.ArrayList;
 
 public final class MRTManager {
-    // Maps train ID to train object for quick lookup
+    // Maps train ID to train object for quick lookup (e.g., "MRT123" -> MRT object)
     private static final Map<String, Schedulable> trainById = new HashMap<>();
     
-    // Maps station name to station object for quick lookup
+    // Maps station name to station object for quick lookup (e.g., "Lebak Bulus" -> CurrentStation object)
     private static final Map<String, CurrentStation> stations = new HashMap<>();
     
-    // MAIN SCHEDULE: departure time -> (train ID -> train)
+    // MAIN SCHEDULE: departure time -> (train ID -> train object)
     // Using TreeMap for both levels ensures trains are sorted by time and then by ID
     private static final TreeMap<Integer, TreeMap<String, Schedulable>> mainSchedule = new TreeMap<>();
     
@@ -36,10 +36,57 @@ public final class MRTManager {
     private static Schedulable earliestSouthboundTrain = null;
 
     private MRTManager() {} // Prevent instantiation
+    
+    // Earlist trains update methods to be used for O(1) lookups in getNextTrain()
+    /**
+     * Updates the earliest trains when a new train is added.
+     */
+    private static void updateEarliestTrains(Schedulable train) {
+        if (train instanceof MRT mrt) {
+            if (mrt.isNorthbound()) {
+                if (earliestNorthboundTrain == null || mrt.isEarlierThan(earliestNorthboundTrain)) {
+                    earliestNorthboundTrain = train;
+                }
+            } else {
+                if (earliestSouthboundTrain == null || mrt.isEarlierThan(earliestSouthboundTrain)) {
+                    earliestSouthboundTrain = train;
+                }
+            }
+        }
+    }
+    /**
+     * Updates the earliest trains when a train is removed.
+     */
+    private static void updateEarliestTrainsAfterRemoval(Schedulable train) {
+        if (train instanceof MRT mrt) {
+            if (mrt.isNorthbound() && train == earliestNorthboundTrain) {
+                // Find new earliest northbound train
+                earliestNorthboundTrain = null;
+                for (var station : stations.values()) {
+                    Schedulable next = station.getNextNorthboundTrain();
+                    if (next instanceof MRT nextTrain && 
+                        (earliestNorthboundTrain == null || nextTrain.isEarlierThan(earliestNorthboundTrain))) {
+                        earliestNorthboundTrain = next;
+                    }
+                }
+            } else if (!mrt.isNorthbound() && train == earliestSouthboundTrain) {
+                // Find new earliest southbound train
+                earliestSouthboundTrain = null;
+                for (var station : stations.values()) {
+                    Schedulable next = station.getNextSouthboundTrain();
+                    if (next instanceof MRT nextTrain && 
+                        (earliestSouthboundTrain == null || nextTrain.isEarlierThan(earliestSouthboundTrain))) {
+                        earliestSouthboundTrain = next;
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Adds a train to the system.
      * Updates all necessary data structures to maintain consistency.
+     * @param schedule the train to add
      */
     public static void addTrain(Schedulable schedule) {
         int dep = schedule.getDepartureTime();
@@ -285,8 +332,7 @@ public final class MRTManager {
     /**
      * Gets the next train at a specific station.
      * Shows both the earliest northbound and southbound trains if they exist.
-     * Only shows trains that haven't departed yet based on current time.
-     * 
+     * Only shows trains that haven't departed yet based on current local time.
      * @param stationName The name of the station to check
      */
     public static void getNextTrain(String stationName) {
@@ -530,52 +576,6 @@ public final class MRTManager {
                 boolean isNorthbound = stationNum < 13; // If not at Bundaran HI (13), train is northbound
                 MRT simTrain = new MRT(mrt.getTrainID(), mrt.getDepartureTime(), currentStation, isNorthbound);
                 simTrain.simulateJourney(stations, isNorthbound, closingTime);
-            }
-        }
-    }
-
-    /**
-     * Updates the earliest trains when a new train is added.
-     */
-    private static void updateEarliestTrains(Schedulable train) {
-        if (train instanceof MRT mrt) {
-            if (mrt.isNorthbound()) {
-                if (earliestNorthboundTrain == null || mrt.isEarlierThan(earliestNorthboundTrain)) {
-                    earliestNorthboundTrain = train;
-                }
-            } else {
-                if (earliestSouthboundTrain == null || mrt.isEarlierThan(earliestSouthboundTrain)) {
-                    earliestSouthboundTrain = train;
-                }
-            }
-        }
-    }
-
-    /**
-     * Updates the earliest trains when a train is removed.
-     */
-    private static void updateEarliestTrainsAfterRemoval(Schedulable train) {
-        if (train instanceof MRT mrt) {
-            if (mrt.isNorthbound() && train == earliestNorthboundTrain) {
-                // Find new earliest northbound train
-                earliestNorthboundTrain = null;
-                for (var station : stations.values()) {
-                    Schedulable next = station.getNextNorthboundTrain();
-                    if (next instanceof MRT nextTrain && 
-                        (earliestNorthboundTrain == null || nextTrain.isEarlierThan(earliestNorthboundTrain))) {
-                        earliestNorthboundTrain = next;
-                    }
-                }
-            } else if (!mrt.isNorthbound() && train == earliestSouthboundTrain) {
-                // Find new earliest southbound train
-                earliestSouthboundTrain = null;
-                for (var station : stations.values()) {
-                    Schedulable next = station.getNextSouthboundTrain();
-                    if (next instanceof MRT nextTrain && 
-                        (earliestSouthboundTrain == null || nextTrain.isEarlierThan(earliestSouthboundTrain))) {
-                        earliestSouthboundTrain = next;
-                    }
-                }
             }
         }
     }
