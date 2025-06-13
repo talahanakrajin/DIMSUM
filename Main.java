@@ -11,7 +11,7 @@ public class Main {
         SchedulingSystem scheduleSystem = new SchedulingSystem();
         Scanner sc = new Scanner(System.in);
 
-        // Main Menu Loop - continues until user chooses to exit
+        // Main Menu Loop
         while (true) {
             // Display welcome message and prompt for user role
             System.out.println("\nWelcome to DIMSUM 'Digital Interactive MRT Schedule Update Manager'");
