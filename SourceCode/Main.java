@@ -1,3 +1,4 @@
+package SourceCode;
 /**
  * Main entry point for the MRT Scheduling System.
  * This class handles the initial user authentication and role-based access control.

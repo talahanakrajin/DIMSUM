@@ -1,3 +1,4 @@
+package SourceCode;
 /**
  * Represents a dynamic schedule for a specific station in the MRT system.
  * This class manages train schedules for both northbound and southbound directions

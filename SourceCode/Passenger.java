@@ -1,3 +1,4 @@
+package SourceCode;
 /**
  * Represents a passenger user in the MRT scheduling system.
  * This class extends the User class and provides passenger-specific functionality
