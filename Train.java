@@ -145,7 +145,7 @@ public class Train extends Stations {
                 String stationName = trainEntry.getValue();
                 int delay = isOnTime.getOrDefault(trainID, 0);
                 if (selectedStation == null || stationName.equalsIgnoreCase(selectedStation)) {
-                    ///* 
+                    /* 
                     String depTimeStr = String.format("%04d", depTime);
                     String hours = depTimeStr.substring(0, 2);
                     String minutes = depTimeStr.substring(2, 4);
@@ -154,16 +154,16 @@ public class Train extends Stations {
                         System.out.printf(" | delayed %d minutes", delay);
                     }
                     System.out.println();
-                    //*/
+                    */
                     found = true;
                 }
             }
         }
-        ///* 
+        /* 
         if (!found) {
             //System.out.println("No trains found!");
         }
-        //*/
+        */
     }
 
     // Print the next departing train
