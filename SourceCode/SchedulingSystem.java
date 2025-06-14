@@ -146,7 +146,7 @@ public class SchedulingSystem {
 
     /* FUNCTIONS MENU LOGIC (For input validation and stuff) */
     // Handles the add train menu for the manager, including manual and automatic modes.
-    public void addTrainMenu(java.util.Scanner sc) {
+    private void addTrainMenu(java.util.Scanner sc) {
         System.out.println("Add Train Schedule Mode:");
         System.out.println("1. Add schedules manually");
         System.out.println("2. Add schedules automatically (batch)");
@@ -276,6 +276,14 @@ public class SchedulingSystem {
         System.out.println("Automatic schedule addition completed.");
     }
 
+    private void printStationScheduleMenu(java.util.Scanner sc, java.util.TreeMap<Integer, String> stationMap) {
+        StationUtils.printStationList(stationMap);
+        System.out.print("Choose Station: ");
+        int stationNum = StationUtils.stationSelection(sc, stationMap);
+        String stationName = StationUtils.getStationName(stationNum, stationMap);
+        printStationSchedule(stationName);
+    }
+
     private void getNextTrainMenu(java.util.Scanner sc) {
         StationUtils.printStationList(stationsData.getStationMap());
         System.out.print("Choose Station (Enter '0' for finding the next departing train in the system): ");
@@ -286,6 +294,15 @@ public class SchedulingSystem {
             String stationName = StationUtils.getStationName(stationNum, stationsData.getStationMap());
             getNextTrain(stationName);
         }
+    }
+
+    // This method is reserved specifically for passengers to find the next train at a station, because finding next train globally is not as important for passengers.
+    private void getNextTrainAtStation(java.util.Scanner sc, java.util.TreeMap<Integer, String> stationMap) {
+        StationUtils.printStationList(stationMap);
+        System.out.print("Choose Station: ");
+        int stationNum = StationUtils.stationSelection(sc, stationMap);
+        String stationName = StationUtils.getStationName(stationNum, stationMap);
+        getNextTrain(stationName);
     }
 
     private void rescheduleTrainMenu(java.util.Scanner sc, Stations stationData) {
@@ -344,21 +361,5 @@ public class SchedulingSystem {
         int closingTime = TimeUtils.promptClosingTime(sc);
         simulateTrainsRunning(closingTime);
         System.out.println("Simulation completed.");
-    }
-
-    private void getNextTrainAtStation(java.util.Scanner sc, java.util.TreeMap<Integer, String> stationMap) {
-        StationUtils.printStationList(stationMap);
-        System.out.print("Choose Station: ");
-        int stationNum = StationUtils.stationSelection(sc, stationMap);
-        String stationName = StationUtils.getStationName(stationNum, stationMap);
-        getNextTrain(stationName);
-    }
-
-    private void printStationScheduleMenu(java.util.Scanner sc, java.util.TreeMap<Integer, String> stationMap) {
-        StationUtils.printStationList(stationMap);
-        System.out.print("Choose Station: ");
-        int stationNum = StationUtils.stationSelection(sc, stationMap);
-        String stationName = StationUtils.getStationName(stationNum, stationMap);
-        printStationSchedule(stationName);
     }
 }
